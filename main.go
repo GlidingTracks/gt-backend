@@ -52,7 +52,7 @@ func createUserPage(w http.ResponseWriter, r *http.Request) {
 
 // Get a App object from Firebase, based on the service account credentials
 func initializeFirebase() *firebase.App {
-	opt := option.WithCredentialsFile("gt-backend-8b9c2-firebase-adminsdk-0t965-80679b9b72.json")
+	opt := option.WithCredentialsFile("gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 
 	if err != nil {
