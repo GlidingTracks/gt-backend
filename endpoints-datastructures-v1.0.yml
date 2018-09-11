@@ -5,3 +5,12 @@
 # Changes:
 # 11.09.2018 - file creation. version: 1.0 @Markus Jacobsen
 #####################################################################
+
+[ // START
+  // @User
+  {
+    "uid": "1234",
+    "email": "123@123.com",
+    "displayName": "123"
+  }
+]

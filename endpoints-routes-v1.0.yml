@@ -5,3 +5,19 @@
 # Changes:
 # 11.09.2018 - file creation. version: 1.0 @Markus Jacobsen
 #####################################################################
+
+/createUser:
+  method: POST
+  summary: Create a new user in firebase user system
+  params:
+    - name: User
+      type: @User # See endpoints-datastructures
+      description: Struct for a User
+      required: true
+  response:
+    - code: 200
+      description: New user added successfully
+      content-type: application/json
+    - code: 400
+      description: bad-request, the payload is proberly badly formatted, server cannot decode
+      content-type: application/json
