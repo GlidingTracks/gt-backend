@@ -1,0 +1,30 @@
+#####################################################################
+# Description: schematics for provided endpoints by the server
+# Version: 1.0
+#
+# Changes:
+# 13.09.2018 - added endpoints for uploading a file
+#####################################################################
+
+/uploadFile:
+  method: POST
+  summary: Upload a IGC file to the server
+  params:
+    - name: uid
+      type: string
+      description: Uploading user's id
+      required: true
+    - name: file
+      type: string
+      description:
+      required: true
+  responses:
+    - code: 200
+      reason: File successfully processed
+      content-type: application/json
+    - code: 400
+      reason: something went wrong in processing the file or no supplied uid
+      content-type: application/json
+    - code: 415
+      reason: File not off correct mime. We only support .IGC
+      content-type: application/json
