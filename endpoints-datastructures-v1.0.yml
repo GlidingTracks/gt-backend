@@ -4,6 +4,7 @@
 #
 # Changes:
 # 11.09.2018 - file creation. version: 1.0 @Markus Jacobsen
+# 13.09.2018 - Updated user model
 #####################################################################
 
 [ // START
@@ -11,6 +12,9 @@
   {
     "uid": "1234",
     "email": "123@123.com",
-    "displayName": "123"
+    "emailVerified": true,
+    "phoneNumber": "99332211",
+    "displayName": "123",
+    "disabled": false
   }
 ]

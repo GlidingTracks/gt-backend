@@ -4,6 +4,7 @@
 #
 # Changes:
 # 11.09.2018 - file creation. version: 1.0 @Markus Jacobsen
+# 13.09.2018 - added endpoint for updating a user
 #####################################################################
 
 /createUser:
@@ -11,12 +12,28 @@
   summary: Create a new user in firebase user system
   params:
     - name: User
-      type: @User # See endpoints-datastructures
+      type: @User # See endpoints-models. Note fields emailVerified and uid will be ignored
       description: Struct for a User
       required: true
   response:
     - code: 200
       description: New user added successfully
+      content-type: application/json
+    - code: 400
+      description: bad-request, the payload is proberly badly formatted, server cannot decode
+      content-type: application/json
+
+/updateUser:
+  method: POST
+  summary: Update attributes of a user
+  params:
+    - name: User
+      type: @User # See endpoints-models. All fields are required
+      description: New struct for a updated user
+      required: true
+  response:
+    - code: 200
+      description: User updated successfully
       content-type: application/json
     - code: 400
       description: bad-request, the payload is proberly badly formatted, server cannot decode
