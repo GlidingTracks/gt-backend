@@ -26,9 +26,9 @@ jobs:
           command: ls -la
       - run:
           name: Store Service Account
-          command: echo $GOOGLE_SERVICES > ${HOME}/google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
+          command: echo $GOOGLE_SERVICES > google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
       - run: ls -la
-      - run: cat ${HOME}/google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
+      - run: cat google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
       - run: go test -v ./...
