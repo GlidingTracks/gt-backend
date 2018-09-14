@@ -4,7 +4,8 @@
 #
 # Changes:
 # 11.09.2018 - file creation. version: 1.0 @Markus Jacobsen
-# 13.09.2018 - added endpoint for updating a user
+# 13.09.2018 - added endpoint for updating a user. Added more response options for createUser
+# 14.09.2018 - added endpoint for deleting a user and getting a user
 #####################################################################
 
 /createUser:
@@ -22,6 +23,9 @@
     - code: 400
       description: bad-request, the payload is proberly badly formatted, server cannot decode
       content-type: application/json
+    - code: 405
+      description: Invalid method.
+      content-type: application/json
 
 /updateUser:
   method: POST
@@ -34,6 +38,38 @@
   response:
     - code: 200
       description: User updated successfully
+      content-type: application/json
+    - code: 400
+      description: bad-request, the payload is proberly badly formatted, server cannot decode
+      content-type: application/json
+
+/deleteuser:
+  method: GET
+  summary: Delete a user
+  params:
+  - name: uId
+    type: String
+    description: Id of user to delete
+    required: true
+  response:
+  - code: 200
+    description: User deleted successfully
+    content-type: application/json
+  - code: 400
+    description: bad-request, the payload is proberly badly formatted, server cannot decode
+    content-type: application/json
+
+/getUser:
+  method: GET
+    summary: Get a user
+    params:
+    - name: uId
+      type: String
+      description: Id of user to get
+      required: true
+    response:
+    - code: 200
+      description: User fetched successfully
       content-type: application/json
     - code: 400
       description: bad-request, the payload is proberly badly formatted, server cannot decode

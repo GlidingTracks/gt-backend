@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"firebase.google.com/go"
 	"fmt"
 	model "github.com/GlidingTracks/gt-backend/models"
@@ -20,7 +21,9 @@ func main() {
 
 	r.HandleFunc("/", startPage)
 	r.HandleFunc("/createUser", createUserPage).Methods("POST")
-	r.HandleFunc("/updateUser", updateUserPage).Methods("POST")
+	r.HandleFunc("/UpdateUser", updateUserPage).Methods("POST")
+	r.HandleFunc("/deleteUser", deleteUserPage).Queries("uId", "{uId}")
+	r.HandleFunc("/getUser", getUserPage).Queries("uId", "{uId}")
 
 	logrus.Fatal(http.ListenAndServe(":8080", r))
 }
@@ -38,15 +41,17 @@ func createUserPage(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&u); err != nil {
-		w.WriteHeader(400)
+		logrus.Error(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	defer r.Body.Close()
 
-	err := createNewUser(app, u)
+	_, err := CreateNewUser(app, u)
 	if err != nil {
 		logrus.Error(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		w.WriteHeader(400)
 	}
 }
@@ -59,17 +64,67 @@ func updateUserPage(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&u); err != nil {
-		w.WriteHeader(400)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	defer r.Body.Close()
 
-	err := updateUser(app, u)
+	_, err := UpdateUser(app, u)
 	if err != nil {
 		logrus.Error(err)
 		w.WriteHeader(400)
 	}
+}
+
+// Endpoint for deleting a user
+func deleteUserPage(w http.ResponseWriter, r *http.Request) {
+	app := initializeFirebase()
+
+	queries := r.URL.Query()
+	if queries == nil {
+		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		return
+	}
+
+	uId := queries.Get("uId")
+	if uId == "" {
+		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		return
+	}
+
+	err := DeleteUser(app, uId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
+// Endpoint for deleting a user
+func getUserPage(w http.ResponseWriter, r *http.Request) {
+	app := initializeFirebase()
+
+	queries := r.URL.Query()
+	if queries == nil {
+		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		return
+	}
+
+	uId := queries.Get("uId")
+	if uId == "" {
+		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		return
+	}
+
+	u, err := GetUser(app, uId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(u)
 }
 
 // Get a App object from Firebase, based on the service account credentials
