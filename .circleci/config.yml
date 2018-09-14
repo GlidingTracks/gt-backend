@@ -19,9 +19,11 @@ jobs:
     ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/GlidingTracks/gt-backend
     steps:
+      - run: ${HOME}
       - run:
           name: Store Service Account
           command: echo $GOOGLE_SERVICES > ${HOME}/google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
+      - run: echo ${HOME}/google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
     steps:
       - checkout
 
