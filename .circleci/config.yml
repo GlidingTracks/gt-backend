@@ -21,7 +21,7 @@ jobs:
     steps:
       - run:
           name: Store Service Account
-          command: echo $GOOGLE_SERVICES > ${HOME}/project/app/google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
+          command: echo $GOOGLE_SERVICES > ${HOME}/google-services.jsongt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
     steps:
       - checkout
 
