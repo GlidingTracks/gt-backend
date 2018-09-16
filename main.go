@@ -5,6 +5,7 @@ import (
 	"errors"
 	"firebase.google.com/go"
 	"fmt"
+	"github.com/GlidingTracks/gt-backend/constant"
 	model "github.com/GlidingTracks/gt-backend/models"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
@@ -14,6 +15,7 @@ import (
 	"net/http"
 )
 
+// First entry-point in application
 func main() {
 	initializeFirebase()
 
@@ -83,13 +85,13 @@ func deleteUserPage(w http.ResponseWriter, r *http.Request) {
 
 	queries := r.URL.Query()
 	if queries == nil {
-		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		http.Error(w, errors.New(constant.ErrorNoUidProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
 	uId := queries.Get("uId")
 	if uId == "" {
-		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		http.Error(w, errors.New(constant.ErrorNoUidProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -106,13 +108,13 @@ func getUserPage(w http.ResponseWriter, r *http.Request) {
 
 	queries := r.URL.Query()
 	if queries == nil {
-		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		http.Error(w, errors.New(constant.ErrorNoUidProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
 	uId := queries.Get("uId")
 	if uId == "" {
-		http.Error(w, errors.New("no uId provided").Error(), http.StatusBadRequest)
+		http.Error(w, errors.New(constant.ErrorNoUidProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -129,7 +131,7 @@ func getUserPage(w http.ResponseWriter, r *http.Request) {
 
 // Get a App object from Firebase, based on the service account credentials
 func initializeFirebase() *firebase.App {
-	opt := option.WithCredentialsFile("gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json")
+	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 
 	if err != nil {
