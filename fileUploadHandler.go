@@ -11,39 +11,39 @@ import (
 	"strings"
 )
 
-// Actual processing of the file upload
+// ProcessUploadRequest - Actual processing of the file upload
 // Inspiration: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/04.5.html
-func ProcessUploadRequest(r* http.Request, uid string) (error, int) {
+func ProcessUploadRequest(r *http.Request, uid string) (int, error) {
 	r.ParseMultipartForm(32 << 20)
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
 		logrus.Error("Could not get file: ", err)
-		return err, http.StatusBadRequest
+		return http.StatusBadRequest, err
 	}
 
 	defer file.Close()
 
 	err = checkFileContentType(file, handler)
 	if err != nil {
-		return err, http.StatusUnsupportedMediaType
+		return http.StatusUnsupportedMediaType, err
 	}
 
 	f, err := saveFileToFileSystem(uid, handler)
 	if err != nil {
 		logrus.Error(err)
-		return err, http.StatusBadRequest
+		return http.StatusBadRequest, err
 	}
 	defer f.Close()
 
 	io.Copy(f, file)
 
-	return nil, 0
+	return 0, nil
 }
 
 // Check whether or not a file is of type IGC
 // https://golang.org/pkg/net/http/#DetectContentType
-func checkFileContentType(file multipart.File, handler* multipart.FileHeader) (error){
+func checkFileContentType(file multipart.File, handler *multipart.FileHeader) error {
 	buff := make([]byte, 512)
 
 	if _, err := file.Read(buff); err != nil {
@@ -61,7 +61,7 @@ func checkFileContentType(file multipart.File, handler* multipart.FileHeader) (e
 }
 
 // Save the uploaded file in the filesystem. Path: .Records/{uId}/
-func saveFileToFileSystem(uid string, handler* multipart.FileHeader) (*os.File, error) {
+func saveFileToFileSystem(uid string, handler *multipart.FileHeader) (*os.File, error) {
 	path := createFilePath("Records", uid)
 	os.MkdirAll(path, os.ModePerm)
 
@@ -74,7 +74,7 @@ func saveFileToFileSystem(uid string, handler* multipart.FileHeader) (*os.File, 
 }
 
 // Method for creating a new path OS independent
-func createFilePath(args ...string) (string) {
+func createFilePath(args ...string) string {
 	var path string
 
 	for _, k := range args {
@@ -86,7 +86,7 @@ func createFilePath(args ...string) (string) {
 
 // If the user has supplied a filename with already existing filepath, clean it up
 // and return only the filename
-func cleanFilePath(filePath string) (string) {
+func cleanFilePath(filePath string) string {
 	parts := strings.Split(filePath, "/")
 	return parts[len(parts)-1]
 }

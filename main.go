@@ -26,11 +26,11 @@ func uploadFilePage(w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 	if uid == "" {
 		logrus.Error("No uid supplied in request")
-		http.Error(w, "No uid supplied in request",  http.StatusBadRequest)
+		http.Error(w, "No uid supplied in request", http.StatusBadRequest)
 		return
 	}
 
-	err, httpCode := ProcessUploadRequest(r, uid)
+	httpCode, err := ProcessUploadRequest(r, uid)
 	if err != nil {
 		logrus.Error(err)
 		http.Error(w, err.Error(), httpCode)

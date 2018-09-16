@@ -14,8 +14,8 @@ import (
 
 func TestProcessUploadRequestWrongContentType(t *testing.T) {
 	values := map[string]io.Reader{
-		"uid": strings.NewReader("123"),
-		"file":  mustOpen("./testdata/text.txt"),
+		"uid":  strings.NewReader("123"),
+		"file": mustOpen("./testdata/text.txt"),
 	}
 
 	req, err := createMultipart(values, "/upload", "POST")
@@ -29,10 +29,10 @@ func TestProcessUploadRequestWrongContentType(t *testing.T) {
 	}
 }
 
-func TestProcessUpload (t *testing.T) {
+func TestProcessUpload(t *testing.T) {
 	values := map[string]io.Reader{
-		"uid": strings.NewReader("123"),
-		"file":  mustOpen("./testdata/testIgc.igc"),
+		"uid":  strings.NewReader("123"),
+		"file": mustOpen("./testdata/testIgc.igc"),
 	}
 
 	req, err := createMultipart(values, "/upload", "POST")
@@ -62,19 +62,19 @@ func createMultipart(values map[string]io.Reader, target string, method string) 
 		// Add binary
 		if x, ok := r.(*os.File); ok {
 			fw, err = w.CreateFormFile(key, x.Name())
-			if  err != nil {
+			if err != nil {
 				return &req, err
 			}
 		} else {
 			// Add other fields
 			fw, err = w.CreateFormField(key)
-			if  err != nil {
+			if err != nil {
 				return &req, err
 			}
 		}
 
 		_, err = io.Copy(fw, r)
-		if  err != nil {
+		if err != nil {
 			return &req, err
 		}
 	}
