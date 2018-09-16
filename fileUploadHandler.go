@@ -3,9 +3,11 @@ package main
 import (
 	"errors"
 	"github.com/Sirupsen/logrus"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -27,14 +29,14 @@ func ProcessUploadRequest(r* http.Request, uid string) (error, int) {
 		return err, http.StatusUnsupportedMediaType
 	}
 
-	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := saveFileToFileSystem(uid, handler)
 	if err != nil {
 		logrus.Error(err)
 		return err, http.StatusBadRequest
 	}
 	defer f.Close()
 
-	//io.Copy(f, file)
+	io.Copy(f, file)
 
 	return nil, 0
 }
@@ -58,6 +60,24 @@ func checkFileContentType(file multipart.File, handler* multipart.FileHeader) (e
 	return nil
 }
 
-func saveFileToFileSystem() {
-	// TODO save to Firebase
+// Save the uploaded file in the filesystem. Path: .Records/{uId}/
+func saveFileToFileSystem(uid string, handler* multipart.FileHeader) (*os.File, error) {
+	path := createFilePath("Records", uid)
+	os.MkdirAll(path, os.ModePerm)
+
+	fileName := path + "/" + handler.Filename
+
+	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
+	return f, err
+}
+
+// Method for creating a new path OS independent
+func createFilePath(args ...string) (string) {
+	var path string
+
+	for _, k := range args {
+		path = filepath.Join(path, k)
+	}
+
+	return path
 }
