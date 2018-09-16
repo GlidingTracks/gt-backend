@@ -23,7 +23,7 @@ func TestProcessUploadRequestWrongContentType(t *testing.T) {
 		t.Error("Could not create multipart")
 	}
 
-	err, code := ProcessUploadRequest(req, "123")
+	code, err := ProcessUploadRequest(req, "123")
 	if err == nil && code != 415 {
 		t.Error("Wrong file content type got through", err)
 	}
@@ -40,7 +40,7 @@ func TestProcessUpload(t *testing.T) {
 		t.Error("Could not create multipart")
 	}
 
-	err, code := ProcessUploadRequest(req, "123")
+	code, err := ProcessUploadRequest(req, "123")
 	if err != nil && code != 200 {
 		t.Error("Could not save file, should pass", err)
 	}
