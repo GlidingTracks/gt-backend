@@ -14,9 +14,9 @@ import (
 func ProcessUploadRequest(r* http.Request, uid string) (error, int) {
 	r.ParseMultipartForm(32 << 20)
 
-	file, handler, err := r.FormFile("uploadfile")
+	file, handler, err := r.FormFile("file")
 	if err != nil {
-		logrus.Error(err)
+		logrus.Error("Could not get file: ", err)
 		return err, http.StatusBadRequest
 	}
 
@@ -53,7 +53,6 @@ func checkFileContentType(file multipart.File, handler* multipart.FileHeader) (e
 
 	if !strings.Contains(handler.Filename, ".igc") || !strings.Contains(content, "text/plain") {
 		return errors.New("invalid content-type")
-
 	}
 
 	return nil
