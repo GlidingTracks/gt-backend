@@ -65,7 +65,9 @@ func saveFileToFileSystem(uid string, handler* multipart.FileHeader) (*os.File, 
 	path := createFilePath("Records", uid)
 	os.MkdirAll(path, os.ModePerm)
 
-	fileName := path + "/" + handler.Filename
+	// CleanedFileName
+	cfn := cleanFilePath(handler.Filename)
+	fileName := path + "/" + cfn
 
 	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
 	return f, err
@@ -80,4 +82,11 @@ func createFilePath(args ...string) (string) {
 	}
 
 	return path
+}
+
+// If the user has supplied a filename with already existing filepath, clean it up
+// and return only the filename
+func cleanFilePath(filePath string) (string) {
+	parts := strings.Split(filePath, "/")
+	return parts[len(parts)-1]
 }
