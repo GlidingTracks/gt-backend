@@ -102,7 +102,7 @@ func deleteUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Endpoint for deleting a user
+// Endpoint for fetching a user from firebase
 func getUserPage(w http.ResponseWriter, r *http.Request) {
 	app := initializeFirebase()
 
