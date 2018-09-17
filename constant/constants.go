@@ -1,4 +1,4 @@
-// constant package contains files with various constants in the application
+// Package constant package contains files with various constants in the application
 package constant
 
 // GoogleServiceCredName supplies the name of the file containing credentials for our

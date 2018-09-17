@@ -3,6 +3,6 @@
 
 sourceFiles="main.go userHandler.go"
 
-go fmt
+gofmt -s -w .
 golint
 go build ${sourceFiles}

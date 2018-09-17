@@ -1,7 +1,7 @@
 package constant
 
 // ErrorNoUidProvided - No uid present in query
-const  ErrorNoUidProvided = "no uId provided"
+const ErrorNoUidProvided = "no uId provided"
 
 // ErrorCouldNotContactFirebase - Could not establish connection with firebase
 const ErrorCouldNotContactFirebase = "could not contact firebase"
