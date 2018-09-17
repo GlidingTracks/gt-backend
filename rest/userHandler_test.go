@@ -1,4 +1,4 @@
-package main
+package rest
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 func initApp() (app *firebase.App) {
-	opt := option.WithCredentialsFile("gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json")
+	opt := option.WithCredentialsFile("../gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 
 	if err != nil {
@@ -20,7 +20,7 @@ func initApp() (app *firebase.App) {
 	return app
 }
 
-func TestCreateNewUser(t *testing.T) {
+func TestUserAPI(t *testing.T) {
 	var userID string
 
 	t.Run("Create user", func(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCreateNewUser(t *testing.T) {
 
 		app := initApp()
 
-		uID, err := CreateNewUser(app, *u)
+		uID, err := createNewUser(app, *u)
 
 		if err != nil {
 			t.Error("Could not create user", err)
@@ -48,7 +48,7 @@ func TestCreateNewUser(t *testing.T) {
 	t.Run("Get", func(t *testing.T) {
 		app := initApp()
 
-		_, err := GetUser(app, userID)
+		_, err := getUser(app, userID)
 		if err != nil {
 			t.Error("Could not get user", err)
 		}
@@ -56,7 +56,7 @@ func TestCreateNewUser(t *testing.T) {
 
 	t.Run("Update", func(t *testing.T) {
 		var u = new(models.User)
-		u.Uid = userID
+		u.UID = userID
 		u.Email = "test@test.com"
 		u.PhoneNumber = "+4799999999"
 		u.DisplayName = "testUpdate"
@@ -64,7 +64,7 @@ func TestCreateNewUser(t *testing.T) {
 
 		app := initApp()
 
-		uu, err := UpdateUser(app, *u)
+		uu, err := updateUser(app, *u)
 		if err != nil {
 			t.Error("Could not update user", err)
 		}
@@ -81,9 +81,16 @@ func TestCreateNewUser(t *testing.T) {
 
 		app := initApp()
 
-		err := DeleteUser(app, userID)
+		err := deleteUser(app, userID)
 		if err != nil {
 			t.Error("Could not delete user", err)
 		}
 	})
+}
+
+func TestUserHandler_Implementations(t *testing.T) {
+	var handler interface{} = &UserHandler{}
+	if _, implemented := handler.(MuxRouteBinder); !implemented {
+		t.Error("does not implement MuxRouteBinder")
+	}
 }
