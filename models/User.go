@@ -1,3 +1,4 @@
+// models contains various data-structures both for internal usage and payloads in the RESTapi
 package models
 
 // User structure

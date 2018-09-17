@@ -21,9 +21,9 @@ func initApp() (app *firebase.App) {
 }
 
 func TestCreateNewUser(t *testing.T) {
-	var userId string
+	var userID string
 
-	t.Run("Create user", func (t *testing.T) {
+	t.Run("Create user", func(t *testing.T) {
 		var u = new(models.User)
 		u.Email = "test@test.com"
 		u.PhoneNumber = "+4799999999"
@@ -32,31 +32,31 @@ func TestCreateNewUser(t *testing.T) {
 
 		app := initApp()
 
-		uId, err := CreateNewUser(app, *u)
+		uID, err := CreateNewUser(app, *u)
 
 		if err != nil {
 			t.Error("Could not create user", err)
 		}
 
-		if uId == "" {
+		if uID == "" {
 			t.Error("Could not create user")
 		}
 
-		userId = uId
+		userID = uID
 	})
 
-	t.Run("Get", func (t *testing.T) {
+	t.Run("Get", func(t *testing.T) {
 		app := initApp()
 
-		_, err := GetUser(app, userId)
+		_, err := GetUser(app, userID)
 		if err != nil {
 			t.Error("Could not get user", err)
 		}
 	})
 
-	t.Run("Update", func (t *testing.T) {
+	t.Run("Update", func(t *testing.T) {
 		var u = new(models.User)
-		u.Uid = userId
+		u.Uid = userID
 		u.Email = "test@test.com"
 		u.PhoneNumber = "+4799999999"
 		u.DisplayName = "testUpdate"
@@ -74,14 +74,14 @@ func TestCreateNewUser(t *testing.T) {
 		}
 	})
 
-	t.Run("Delete user", func (t *testing.T) {
-		if userId == "" {
+	t.Run("Delete user", func(t *testing.T) {
+		if userID == "" {
 			t.Skip("Previous test failed")
 		}
 
 		app := initApp()
 
-		err := DeleteUser(app, userId)
+		err := DeleteUser(app, userID)
 		if err != nil {
 			t.Error("Could not delete user", err)
 		}

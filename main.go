@@ -15,7 +15,7 @@ import (
 	"net/http"
 )
 
-// First entry-point in application
+// main is the first entry-point in application.
 func main() {
 	initializeFirebase()
 
@@ -30,12 +30,12 @@ func main() {
 	logrus.Fatal(http.ListenAndServe(":8080", r))
 }
 
-// Redirect here is url: localhost:8080 is supplied
+// startPage redirects every non-existing path to url: localhost:8080/.
 func startPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Hello from go - Gliding tracks\n")
 }
 
-// Endpoint for creating users
+// createUserPage is the endpoint for creating users
 func createUserPage(w http.ResponseWriter, r *http.Request) {
 	app := initializeFirebase()
 
@@ -58,7 +58,7 @@ func createUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Endpoint for updating a user
+// updateUserPage is the endpoint for updating a user
 func updateUserPage(w http.ResponseWriter, r *http.Request) {
 	app := initializeFirebase()
 
@@ -79,7 +79,7 @@ func updateUserPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Endpoint for deleting a user
+// deleteUserPage is the endpoint for deleting a user.
 func deleteUserPage(w http.ResponseWriter, r *http.Request) {
 	app := initializeFirebase()
 
@@ -89,20 +89,20 @@ func deleteUserPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uId := queries.Get("uId")
-	if uId == "" {
+	uID := queries.Get("uId")
+	if uID == "" {
 		http.Error(w, errors.New(constant.ErrorNoUidProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
-	err := DeleteUser(app, uId)
+	err := DeleteUser(app, uID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 }
 
-// Endpoint for fetching a user from firebase
+// getUserPage is the endpoint for fetching a user from firebase.
 func getUserPage(w http.ResponseWriter, r *http.Request) {
 	app := initializeFirebase()
 
@@ -112,13 +112,13 @@ func getUserPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uId := queries.Get("uId")
-	if uId == "" {
+	uID := queries.Get("uId")
+	if uID == "" {
 		http.Error(w, errors.New(constant.ErrorNoUidProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
-	u, err := GetUser(app, uId)
+	u, err := GetUser(app, uID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -129,7 +129,7 @@ func getUserPage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(u)
 }
 
-// Get a App object from Firebase, based on the service account credentials
+// initializeFirebase gets a App object from Firebase, based on the service account credentials.
 func initializeFirebase() *firebase.App {
 	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
