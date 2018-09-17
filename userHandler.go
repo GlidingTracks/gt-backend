@@ -13,7 +13,7 @@ import (
 // Either returns the created users uId or an error.
 func CreateNewUser(app *firebase.App, u model.User) (string, error) {
 	if app == nil {
-		return "", errors.New(constant.ErrorCouldNotContactFirebae)
+		return "", errors.New(constant.ErrorCouldNotContactFirebase)
 	}
 
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func UpdateUser(app *firebase.App, u model.User) (model.User, error) {
 	var uu model.User
 
 	if app == nil {
-		return uu, errors.New(constant.ErrorCouldNotContactFirebae)
+		return uu, errors.New(constant.ErrorCouldNotContactFirebase)
 	}
 
 	ctx := context.Background()
@@ -79,7 +79,7 @@ func GetUser(app *firebase.App, uID string) (model.User, error) {
 	var u model.User
 
 	if app == nil {
-		return u, errors.New(constant.ErrorCouldNotContactFirebae)
+		return u, errors.New(constant.ErrorCouldNotContactFirebase)
 	}
 
 	ctx := context.Background()
@@ -103,7 +103,7 @@ func GetUser(app *firebase.App, uID string) (model.User, error) {
 // DeleteUser will delete a user based on it's id from firebase.
 func DeleteUser(app *firebase.App, uID string) error {
 	if app == nil {
-		return errors.New(constant.ErrorCouldNotContactFirebae)
+		return errors.New(constant.ErrorCouldNotContactFirebase)
 	}
 
 	ctx := context.Background()

@@ -4,7 +4,7 @@ package constant
 const  ErrorNoUidProvided = "no uId provided"
 
 // ErrorCouldNotContactFirebase - Could not establish connection with firebase
-const ErrorCouldNotContactFirebae = "could not contact firebase"
+const ErrorCouldNotContactFirebase = "could not contact firebase"
 
 // ErrorNotImplemented - User tried accessing method marked 'not implemented'
 const ErrorNotImplemented = "not implemented"
