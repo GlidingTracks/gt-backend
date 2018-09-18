@@ -3,23 +3,26 @@ package constant
 // ErrorNoUIDProvided - No uid present in query.
 const ErrorNoUIDProvided = "no uId provided"
 
+// ErrorNoQueriesInPath - No queries detected in path.
+const ErrorNoQueriesInPath = "no queries detected in path"
+
 // ErrorCouldNotContactFirebase - Could not establish connection with firebase.
 const ErrorCouldNotContactFirebase = "failed to contact firebase"
 
 // ErrorNotImplemented - User tried accessing method marked 'not implemented'.
 const ErrorNotImplemented = "not implemented"
 
-// ErrorCouldBodyFailed.
+// ErrorCouldBodyFailed - could not process request body.
 const ErrorProcessBodyFailed = "failed to process request body"
 
-// ErrorCouldNotCreateUser.
+// ErrorCouldNotCreateUser - could not create new user.
 const ErrorCouldNotCreateUser = "failed to create new user"
 
-// ErrorCouldNotGetUser.
+// ErrorCouldNotGetUser - could not get requested user.
 const ErrorCouldNotGetUser = "failed to fetch requested user"
 
-// ErrorCouldNotUpdateUser.
+// ErrorCouldNotUpdateUser - could not update user.
 const ErrorCouldNotUpdateUser = "failed to update requested user, make sure user exists"
 
-// ErrorCouldNotDeleteUser.
+// ErrorCouldNotDeleteUser - could not delete user.
 const ErrorDeleteUser = "failed to delete user"

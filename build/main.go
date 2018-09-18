@@ -14,7 +14,7 @@ import (
 
 // main is the first entry-point in application.
 func main() {
-	// TODO remove in prod
+	// TODO set correct level in prod
 	logrus.SetLevel(logrus.DebugLevel)
 
 	ctx := &rest.Context{

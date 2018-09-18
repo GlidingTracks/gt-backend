@@ -11,7 +11,6 @@ import (
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	model "github.com/GlidingTracks/gt-backend/models"
-	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -43,7 +42,8 @@ func (userHandler UserHandler) createUserPage(w http.ResponseWriter, r *http.Req
 
 	err := unmarshal(r, &u)
 	if err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileName, "createUserPage", err)
+
 		http.Error(w, errors.New(constant.ErrorProcessBodyFailed).Error(), http.StatusBadRequest)
 		return
 	}
@@ -51,7 +51,8 @@ func (userHandler UserHandler) createUserPage(w http.ResponseWriter, r *http.Req
 	// Try to create a user in firebase
 	_, err = createNewUser(userHandler.Ctx.App, u)
 	if err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileName, "createUserPage", err)
+
 		http.Error(w, errors.New(constant.ErrorCouldNotCreateUser).Error(), http.StatusBadRequest)
 	}
 }
@@ -62,14 +63,16 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 
 	err := unmarshal(r, &u)
 	if err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileName, "updateUserPage", err)
+
 		http.Error(w, errors.New(constant.ErrorProcessBodyFailed).Error(), http.StatusBadRequest)
 		return
 	}
 
 	_, err = updateUser(userHandler.Ctx.App, u)
 	if err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileName, "updateUserPage", err)
+
 		http.Error(w, errors.New(constant.ErrorCouldNotUpdateUser).Error(), http.StatusBadRequest)
 	}
 }
@@ -78,18 +81,24 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 	if queries == nil {
+		gtbackend.DebugLog(fileName, "deleteUserPage", errors.New(constant.ErrorNoQueriesInPath))
+
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
 	uID := queries.Get("uId")
 	if uID == "" {
+		gtbackend.DebugLog(fileName, "deleteUserPage", errors.New(constant.ErrorNoUIDProvided))
+
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
 	err := deleteUser(userHandler.Ctx.App, uID)
 	if err != nil {
+		gtbackend.DebugLog(fileName, "deleteUserPage", err)
+
 		http.Error(w, errors.New(constant.ErrorDeleteUser).Error(), http.StatusBadRequest)
 		return
 	}
@@ -99,14 +108,16 @@ func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Req
 func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 	if queries == nil {
-		logrus.Error("no queries detected in path")
+		gtbackend.DebugLog(fileName, "getUserPage", errors.New(constant.ErrorNoQueriesInPath))
+
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
 	}
 
 	uID := queries.Get("uId")
 	if uID == "" {
-		logrus.Error("no uId specified in getUserPage")
+		gtbackend.DebugLog(fileName, "getUserPage", errors.New(constant.ErrorNoUIDProvided))
+
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
 	}
@@ -114,6 +125,7 @@ func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Reques
 	u, err := getUser(userHandler.Ctx.App, uID)
 	if err != nil {
 		gtbackend.DebugLog(fileName, "getUserPage", err)
+
 		http.Error(w, errors.New(constant.ErrorCouldNotGetUser).Error(), http.StatusBadRequest)
 		return
 	}
