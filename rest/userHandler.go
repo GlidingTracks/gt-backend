@@ -8,12 +8,16 @@ import (
 	"errors"
 	"firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	model "github.com/GlidingTracks/gt-backend/models"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"net/http"
 )
+
+// Used in debugging. TODO remove before prod
+const fileName = "userHandler.go"
 
 // UserHandler handler object for acting upon a User in firebase.
 // Contains a Context var as well as the different routes.
@@ -109,7 +113,7 @@ func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Reques
 
 	u, err := getUser(userHandler.Ctx.App, uID)
 	if err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileName, "getUserPage", err)
 		http.Error(w, errors.New(constant.ErrorCouldNotGetUser).Error(), http.StatusBadRequest)
 		return
 	}
@@ -199,7 +203,6 @@ func getUser(app *firebase.App, uID string) (user model.User, err error) {
 	}
 
 	ur, err := client.GetUser(ctx, uID)
-
 	if err != nil {
 		return
 	}

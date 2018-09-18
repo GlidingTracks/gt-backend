@@ -14,6 +14,9 @@ import (
 
 // main is the first entry-point in application.
 func main() {
+	// TODO remove in prod
+	logrus.SetLevel(logrus.DebugLevel)
+
 	ctx := &rest.Context{
 		App: initializeFirebase(),
 	}
