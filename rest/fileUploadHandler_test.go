@@ -53,7 +53,6 @@ func TestFileUploadHandler_Implementations(t *testing.T) {
 	}
 }
 
-
 // Shamefully nicked stackoverflow answer: https://stackoverflow.com/a/20397167/7036624
 // Slightly modified to suit our needs
 func createMultipart(values map[string]io.Reader, target string, method string) (*http.Request, error) {

@@ -10,6 +10,3 @@ const Slash = "/"
 
 // IGCExtension - file type igc
 const IGCExtension = "igc"
-
-
-

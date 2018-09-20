@@ -34,7 +34,7 @@ func main() {
 	userRoutes.Bind(r)
 
 	fileUploadRoutes := &rest.FileUploadHandler{
-		Ctx: *ctx,
+		Ctx:            *ctx,
 		UploadFilePage: "/upload",
 	}
 
