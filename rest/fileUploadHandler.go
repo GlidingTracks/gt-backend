@@ -47,58 +47,63 @@ func uploadFilePage(w http.ResponseWriter, r *http.Request) {
 
 // ProcessUploadRequest - Actual processing of the file upload
 // Inspiration: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/04.5.html
-func ProcessUploadRequest(r *http.Request, uid string) (int, error) {
+func ProcessUploadRequest(r *http.Request, uid string) (httpCode int, err error) {
 	r.ParseMultipartForm(32 << 20)
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
 		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
 
-		return http.StatusBadRequest, err
+		httpCode = http.StatusBadRequest
+		return
 	}
 
 	defer file.Close()
 
 	err = checkFileContentType(file, handler)
 	if err != nil {
-		return http.StatusUnsupportedMediaType, err
+		httpCode = http.StatusUnsupportedMediaType
+		return
 	}
 
 	f, err := saveFileToFileSystem(uid, handler)
 	if err != nil {
 		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
 
-		return http.StatusBadRequest, err
+		httpCode = http.StatusBadRequest
+		return
 	}
 	defer f.Close()
 
 	io.Copy(f, file)
 
-	return 0, nil
+	httpCode = http.StatusOK
+	return
 }
 
 // Check whether or not a file is of type IGC
 // https://golang.org/pkg/net/http/#DetectContentType
-func checkFileContentType(file multipart.File, handler *multipart.FileHeader) error {
+func checkFileContentType(file multipart.File, handler *multipart.FileHeader) (err error) {
 	buff := make([]byte, 512)
 
-	if _, err := file.Read(buff); err != nil {
+	if _, err = file.Read(buff); err != nil {
 		gtbackend.DebugLog(fileNameFUH, "checkFileContentType", err)
 
-		return err
+		return
 	}
 
 	content := http.DetectContentType(buff)
 
 	if !strings.Contains(handler.Filename, "." + constant.IGCExtension) || !strings.Contains(content, constant.TextPlain) {
-		return errors.New(constant.ErrorInvalidContentType)
+		err = errors.New(constant.ErrorInvalidContentType)
+		return
 	}
 
-	return nil
+	return
 }
 
 // Save the uploaded file in the filesystem. Path: .Records/{uId}/
-func saveFileToFileSystem(uid string, handler *multipart.FileHeader) (*os.File, error) {
+func saveFileToFileSystem(uid string, handler *multipart.FileHeader) (file *os.File, err error) {
 	path := createFilePath(constant.LSRoot, uid)
 	os.MkdirAll(path, os.ModePerm)
 
@@ -106,24 +111,25 @@ func saveFileToFileSystem(uid string, handler *multipart.FileHeader) (*os.File, 
 	cfn := cleanFilePath(handler.Filename)
 	fileName := path + constant.Slash + cfn
 
-	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
-	return f, err
+	file, err = os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
+
+	return
 }
 
 // Method for creating a new path OS independent
-func createFilePath(args ...string) string {
-	var path string
-
+func createFilePath(args ...string) (path string) {
 	for _, k := range args {
 		path = filepath.Join(path, k)
 	}
 
-	return path
+	return
 }
 
 // If the user has supplied a filename with already existing filepath, clean it up
 // and return only the filename
-func cleanFilePath(filePath string) string {
+func cleanFilePath(filePath string) (fileName string) {
 	parts := strings.Split(filePath, constant.Slash)
-	return parts[len(parts)-1]
+
+	fileName = parts[len(parts)-1]
+	return
 }
