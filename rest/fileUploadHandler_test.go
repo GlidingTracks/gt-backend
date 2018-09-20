@@ -1,4 +1,4 @@
-package main
+package rest
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 func TestProcessUploadRequestWrongContentType(t *testing.T) {
 	values := map[string]io.Reader{
 		"uid":  strings.NewReader("123"),
-		"file": mustOpen("./testdata/text.txt"),
+		"file": mustOpen("../testdata/text.txt"),
 	}
 
 	req, err := createMultipart(values, "/upload", "POST")
@@ -32,7 +32,7 @@ func TestProcessUploadRequestWrongContentType(t *testing.T) {
 func TestProcessUpload(t *testing.T) {
 	values := map[string]io.Reader{
 		"uid":  strings.NewReader("123"),
-		"file": mustOpen("./testdata/testIgc.igc"),
+		"file": mustOpen("../testdata/testIgc.igc"),
 	}
 
 	req, err := createMultipart(values, "/upload", "POST")
@@ -45,6 +45,14 @@ func TestProcessUpload(t *testing.T) {
 		t.Error("Could not save file, should pass", err)
 	}
 }
+
+func TestFileUploadHandler_Implementations(t *testing.T) {
+	var handler interface{} = &FileUploadHandler{}
+	if _, implemented := handler.(MuxRouteBinder); !implemented {
+		t.Error("does not implement MuxRouteBinder")
+	}
+}
+
 
 // Shamefully nicked stackoverflow answer: https://stackoverflow.com/a/20397167/7036624
 // Slightly modified to suit our needs

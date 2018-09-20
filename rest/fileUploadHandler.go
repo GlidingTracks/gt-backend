@@ -1,8 +1,9 @@
-package main
+package rest
 
 import (
 	"errors"
 	"github.com/Sirupsen/logrus"
+	"github.com/gorilla/mux"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -10,6 +11,31 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+type FileUploadHandler struct {
+	Ctx Context
+	UploadFilePage string
+}
+
+func (fuh FileUploadHandler) Bind(r *mux.Router) {
+	r.HandleFunc("/upload", uploadFilePage).Methods("POST")
+}
+
+// Upload and save a file to the filesystem
+func uploadFilePage(w http.ResponseWriter, r *http.Request) {
+	uid := r.FormValue("uid")
+	if uid == "" {
+		logrus.Error("No uid supplied in request")
+		http.Error(w, "No uid supplied in request", http.StatusBadRequest)
+		return
+	}
+
+	httpCode, err := ProcessUploadRequest(r, uid)
+	if err != nil {
+		logrus.Error(err)
+		http.Error(w, err.Error(), httpCode)
+	}
+}
 
 // ProcessUploadRequest - Actual processing of the file upload
 // Inspiration: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/04.5.html

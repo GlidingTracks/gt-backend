@@ -33,6 +33,13 @@ func main() {
 
 	userRoutes.Bind(r)
 
+	fileUploadRoutes := &rest.FileUploadHandler{
+		Ctx: *ctx,
+		UploadFilePage: "/upload",
+	}
+
+	fileUploadRoutes.Bind(r)
+
 	r.HandleFunc("/", startPage)
 
 	logrus.Fatal(http.ListenAndServe(":8080", r))
