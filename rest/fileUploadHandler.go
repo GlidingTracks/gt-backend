@@ -2,6 +2,8 @@ package rest
 
 import (
 	"errors"
+	"github.com/GlidingTracks/gt-backend"
+	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"io"
@@ -12,11 +14,16 @@ import (
 	"strings"
 )
 
+// Used in debugging. TODO remove before prod
+const fileNameFUH = "fileUploadHandler.go"
+
+// FileUploadHandler holds the context and routes for this handler.
 type FileUploadHandler struct {
 	Ctx Context
 	UploadFilePage string
 }
 
+// Bind sets up the routes to the mux router.
 func (fuh FileUploadHandler) Bind(r *mux.Router) {
 	r.HandleFunc("/upload", uploadFilePage).Methods("POST")
 }
@@ -25,8 +32,9 @@ func (fuh FileUploadHandler) Bind(r *mux.Router) {
 func uploadFilePage(w http.ResponseWriter, r *http.Request) {
 	uid := r.FormValue("uid")
 	if uid == "" {
-		logrus.Error("No uid supplied in request")
-		http.Error(w, "No uid supplied in request", http.StatusBadRequest)
+		gtbackend.DebugLog(fileNameFUH, "uploadFilePage", errors.New(constant.ErrorNoUIDProvided))
+
+		http.Error(w, constant.ErrorNoUIDProvided, http.StatusBadRequest)
 		return
 	}
 
@@ -44,7 +52,8 @@ func ProcessUploadRequest(r *http.Request, uid string) (int, error) {
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		logrus.Error("Could not get file: ", err)
+		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
+
 		return http.StatusBadRequest, err
 	}
 
@@ -57,7 +66,8 @@ func ProcessUploadRequest(r *http.Request, uid string) (int, error) {
 
 	f, err := saveFileToFileSystem(uid, handler)
 	if err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
+
 		return http.StatusBadRequest, err
 	}
 	defer f.Close()
@@ -73,14 +83,15 @@ func checkFileContentType(file multipart.File, handler *multipart.FileHeader) er
 	buff := make([]byte, 512)
 
 	if _, err := file.Read(buff); err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileNameFUH, "checkFileContentType", err)
+
 		return err
 	}
 
 	content := http.DetectContentType(buff)
 
-	if !strings.Contains(handler.Filename, ".igc") || !strings.Contains(content, "text/plain") {
-		return errors.New("invalid content-type")
+	if !strings.Contains(handler.Filename, "." + constant.IGCExtension) || !strings.Contains(content, constant.TextPlain) {
+		return errors.New(constant.ErrorInvalidContentType)
 	}
 
 	return nil
@@ -88,12 +99,12 @@ func checkFileContentType(file multipart.File, handler *multipart.FileHeader) er
 
 // Save the uploaded file in the filesystem. Path: .Records/{uId}/
 func saveFileToFileSystem(uid string, handler *multipart.FileHeader) (*os.File, error) {
-	path := createFilePath("Records", uid)
+	path := createFilePath(constant.LSRoot, uid)
 	os.MkdirAll(path, os.ModePerm)
 
 	// CleanedFileName
 	cfn := cleanFilePath(handler.Filename)
-	fileName := path + "/" + cfn
+	fileName := path + constant.Slash + cfn
 
 	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
 	return f, err
@@ -113,6 +124,6 @@ func createFilePath(args ...string) string {
 // If the user has supplied a filename with already existing filepath, clean it up
 // and return only the filename
 func cleanFilePath(filePath string) string {
-	parts := strings.Split(filePath, "/")
+	parts := strings.Split(filePath, constant.Slash)
 	return parts[len(parts)-1]
 }
