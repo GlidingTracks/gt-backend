@@ -4,28 +4,30 @@
 version: 2
 jobs:
   build:
+    environment:
+      CC_TEST_REPORTER_ID: e063829bc9274e27da53d97e777a18b1ea21dc28e5f0be5f3be435cbba196006
     docker:
-      # specify the version
       - image: circleci/golang:1.9
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/GlidingTracks/gt-backend
-  
     steps:
       - checkout
-     
+      - run: go get -v -t -d ./...
+      - run: go get github.com/axw/gocov/gocov
       - run:
           name: Store Service Account
           command: echo $GOOGLE_SERVICES > gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json
-  
-      # specify any bash command here prefixed with `run: `
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
+      - run:
+          name: Setup Code Climate test-reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter ./cc-test-reporter before-build
+      - run:
+          name: Run tests
+          command: |
+            for pkg in $(go list ./... | grep -v vendor); do
+                go test -coverprofile=$(echo $pkg | tr / -).cover $pkg
+            done
+            echo "mode: set" > c.out
+            grep -h -v "^mode:" ./*.cover >> c.out
+            rm -f *.cover
+
