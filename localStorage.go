@@ -51,4 +51,3 @@ func cleanFilePath(filePath string) (fileName string) {
 	fileName = parts[len(parts)-1]
 	return
 }
-

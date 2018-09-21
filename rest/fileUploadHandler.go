@@ -100,4 +100,3 @@ func checkFileContentType(file multipart.File, handler *multipart.FileHeader) (e
 
 	return
 }
-
