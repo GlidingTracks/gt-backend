@@ -16,7 +16,7 @@ import (
 )
 
 // Used in debugging. TODO remove before prod
-const fileName = "userHandler.go"
+const fileNameUH = "userHandler.go"
 
 // UserHandler handler object for acting upon a User in firebase.
 // Contains a Context var as well as the different routes.
@@ -42,7 +42,7 @@ func (userHandler UserHandler) createUserPage(w http.ResponseWriter, r *http.Req
 
 	err := unmarshal(r, &u)
 	if err != nil {
-		gtbackend.DebugLog(fileName, "createUserPage", err)
+		gtbackend.DebugLog(fileNameUH, "createUserPage", err)
 
 		http.Error(w, errors.New(constant.ErrorProcessBodyFailed).Error(), http.StatusBadRequest)
 		return
@@ -51,7 +51,7 @@ func (userHandler UserHandler) createUserPage(w http.ResponseWriter, r *http.Req
 	// Try to create a user in firebase
 	_, err = createNewUser(userHandler.Ctx.App, u)
 	if err != nil {
-		gtbackend.DebugLog(fileName, "createUserPage", err)
+		gtbackend.DebugLog(fileNameUH, "createUserPage", err)
 
 		http.Error(w, errors.New(constant.ErrorCouldNotCreateUser).Error(), http.StatusBadRequest)
 	}
@@ -63,7 +63,7 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 
 	err := unmarshal(r, &u)
 	if err != nil {
-		gtbackend.DebugLog(fileName, "updateUserPage", err)
+		gtbackend.DebugLog(fileNameUH, "updateUserPage", err)
 
 		http.Error(w, errors.New(constant.ErrorProcessBodyFailed).Error(), http.StatusBadRequest)
 		return
@@ -71,7 +71,7 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 
 	_, err = updateUser(userHandler.Ctx.App, u)
 	if err != nil {
-		gtbackend.DebugLog(fileName, "updateUserPage", err)
+		gtbackend.DebugLog(fileNameUH, "updateUserPage", err)
 
 		http.Error(w, errors.New(constant.ErrorCouldNotUpdateUser).Error(), http.StatusBadRequest)
 	}
@@ -81,7 +81,7 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 	if queries == nil {
-		gtbackend.DebugLog(fileName, "deleteUserPage", errors.New(constant.ErrorNoQueriesInPath))
+		gtbackend.DebugLog(fileNameUH, "deleteUserPage", errors.New(constant.ErrorNoQueriesInPath))
 
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
@@ -89,7 +89,7 @@ func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Req
 
 	uID := queries.Get("uId")
 	if uID == "" {
-		gtbackend.DebugLog(fileName, "deleteUserPage", errors.New(constant.ErrorNoUIDProvided))
+		gtbackend.DebugLog(fileNameUH, "deleteUserPage", errors.New(constant.ErrorNoUIDProvided))
 
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
@@ -97,7 +97,7 @@ func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Req
 
 	err := deleteUser(userHandler.Ctx.App, uID)
 	if err != nil {
-		gtbackend.DebugLog(fileName, "deleteUserPage", err)
+		gtbackend.DebugLog(fileNameUH, "deleteUserPage", err)
 
 		http.Error(w, errors.New(constant.ErrorDeleteUser).Error(), http.StatusBadRequest)
 		return
@@ -108,7 +108,7 @@ func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Req
 func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 	if queries == nil {
-		gtbackend.DebugLog(fileName, "getUserPage", errors.New(constant.ErrorNoQueriesInPath))
+		gtbackend.DebugLog(fileNameUH, "getUserPage", errors.New(constant.ErrorNoQueriesInPath))
 
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
@@ -116,7 +116,7 @@ func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Reques
 
 	uID := queries.Get("uId")
 	if uID == "" {
-		gtbackend.DebugLog(fileName, "getUserPage", errors.New(constant.ErrorNoUIDProvided))
+		gtbackend.DebugLog(fileNameUH, "getUserPage", errors.New(constant.ErrorNoUIDProvided))
 
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
@@ -124,7 +124,7 @@ func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Reques
 
 	u, err := getUser(userHandler.Ctx.App, uID)
 	if err != nil {
-		gtbackend.DebugLog(fileName, "getUserPage", err)
+		gtbackend.DebugLog(fileNameUH, "getUserPage", err)
 
 		http.Error(w, errors.New(constant.ErrorCouldNotGetUser).Error(), http.StatusBadRequest)
 		return

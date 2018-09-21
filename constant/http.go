@@ -1,15 +1,18 @@
 package constant
 
-// Http header variable for Content-Type.
+// ContentType - Http header variable for Content-Type.
 const ContentType = "Content-Type"
 
-// application/json option for header.
+// ApplicationJSON - Content-type application/json option for header.
 const ApplicationJSON = "application/json"
+
+// TextPlain - Content-type text/plain option for header.
+const TextPlain = "text/plain"
 
 // Methods
 
-// POST http method.
+// Post - POST http method.
 const Post = "POST"
 
-// GET http method
+// Get - GET http method
 const Get = "Get"
