@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
-	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"io"
 	"mime/multipart"
@@ -38,7 +37,8 @@ func uploadFilePage(w http.ResponseWriter, r *http.Request) {
 
 	httpCode, err := ProcessUploadRequest(r, uid)
 	if err != nil {
-		logrus.Error(err)
+		gtbackend.DebugLog(fileNameFUH, "uploadFilePage", err)
+
 		http.Error(w, err.Error(), httpCode)
 	}
 }
