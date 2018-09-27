@@ -31,14 +31,22 @@ func main() {
 		GetUserPage:    "/getUser",
 	}
 
-	userRoutes.Bind(r)
-
 	fileUploadRoutes := &rest.FileUploadHandler{
 		Ctx:            *ctx,
 		UploadFilePage: "/upload",
 	}
 
+	dbRoutes := &rest.DbHandler{
+		Ctx:         *ctx,
+		InsertTrack: "/insertTrack",
+		GetTracks: "/getTracks",
+		GetTrack: "/getTrack",
+		DeleteTrack: "/deleteTrack",
+	}
+
+	userRoutes.Bind(r)
 	fileUploadRoutes.Bind(r)
+	dbRoutes.Bind(r)
 
 	r.HandleFunc("/", startPage)
 

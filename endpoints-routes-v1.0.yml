@@ -8,6 +8,7 @@
 # 13.09.2018 - added endpoints for uploading a file
 # 14.09.2018 - added endpoint for deleting a user and getting a user
 # 27.09.2018 - added endpoint for showing a list of tracks
+# 27.09.2018 - added endpoint for inserting a track record in DB
 #####################################################################
 
 /createUser:
@@ -77,6 +78,7 @@
       description: bad-request, the payload is proberly badly formatted, server cannot decode
       content-type: application/json
 
+# Deprecated, use insertTrack instead
 /uploadFile:
   method: POST
   summary: Upload a IGC file to the server
@@ -117,4 +119,27 @@
       content-type: application/json
     - code: 403
       description: unauthorized, user id cannot be authenticated
+      content-type: application/json
+
+/insertTrack:
+  method: POST
+    summary: Upload a IGC file to the server
+    params:
+    - name: uid
+      type: string
+      description: Uploading user's id
+      required: true
+    - name: file
+      type: string
+      description:
+      required: true
+    responses:
+    - code: 200
+      reason: File successfully processed
+      content-type: application/json
+    - code: 400
+      reason: something went wrong in processing the file or no supplied uid
+      content-type: application/json
+    - code: 415
+      reason: File not off correct mime. We only support .IGC
       content-type: application/json

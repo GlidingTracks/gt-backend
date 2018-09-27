@@ -5,6 +5,7 @@
 # Changes:
 # 11.09.2018 - file creation. version: 1.0 @Markus Jacobsen
 # 13.09.2018 - Updated user model
+# 26.09.2018 - Added payload for inserting a track
 #####################################################################
 
 [ // START
@@ -16,5 +17,11 @@
     "phoneNumber": "99332211",
     "displayName": "123",
     "disabled": false
+  },
+
+  // @InsertTrackPayload
+  {
+    "uid": "1234",
+    "file": "/file.igc"
   }
 ]
