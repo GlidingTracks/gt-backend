@@ -13,7 +13,7 @@ func TestLocalStorage(t *testing.T) {
 
 	t.Run("Save", func(t *testing.T) {
 
-		_, err := SaveFileToLocalStorage(uid, filePath)
+		_, _, err := SaveFileToLocalStorage(uid, filePath)
 		if err != nil {
 			t.Error("Could not save file")
 		}
