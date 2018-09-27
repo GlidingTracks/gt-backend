@@ -24,7 +24,7 @@ type DbHandler struct {
 // Bind sets up the routes to the mux router.
 func (dbHandler DbHandler) Bind(r *mux.Router) {
 	r.HandleFunc(dbHandler.InsertTrack, dbHandler.insertTrackRecordPage).Methods(constant.Post)
-	r.HandleFunc(dbHandler.GetTracks, dbHandler.getTracksPage).Queries("sort", "{sort}").Queries("nr", "{nr}").Queries("pg", "{pg}")
+	r.HandleFunc(dbHandler.GetTracks, dbHandler.getTracksPage).Methods(constant.Get)
 	r.HandleFunc(dbHandler.GetTrack, dbHandler.getTrackPage).Queries("trID", "{trID}")
 	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Queries("trID", "{trID}")
 }
@@ -50,7 +50,8 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 }
 
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
-
+	gtbackend.DebugLog(fileNameDB, "getTracksPage", nil)
+	return
 }
 
 func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) {

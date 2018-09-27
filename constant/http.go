@@ -15,4 +15,4 @@ const TextPlain = "text/plain"
 const Post = "POST"
 
 // Get - GET http method
-const Get = "Get"
+const Get = "GET"
