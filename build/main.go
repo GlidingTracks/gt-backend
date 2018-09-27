@@ -39,6 +39,9 @@ func main() {
 	dbRoutes := &rest.DbHandler{
 		Ctx:         *ctx,
 		InsertTrack: "/insertTrack",
+		GetTracks: "/getTracks",
+		GetTrack: "/getTrack",
+		DeleteTrack: "/deleteTrack",
 	}
 
 	userRoutes.Bind(r)

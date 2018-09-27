@@ -23,7 +23,7 @@ type FileUploadHandler struct {
 
 // Bind sets up the routes to the mux router.
 func (fuh FileUploadHandler) Bind(r *mux.Router) {
-	r.HandleFunc("/upload", uploadFilePage).Methods("POST")
+	r.HandleFunc(fuh.UploadFilePage, uploadFilePage).Methods("POST")
 }
 
 // uploadFilePage - Upload and save a file to the filesystem
