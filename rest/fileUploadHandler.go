@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
+	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/gorilla/mux"
 	"io"
 	"mime/multipart"
@@ -27,15 +28,7 @@ func (fuh FileUploadHandler) Bind(r *mux.Router) {
 
 // uploadFilePage - Upload and save a file to the filesystem
 func uploadFilePage(w http.ResponseWriter, r *http.Request) {
-	uid := r.FormValue("uid")
-	if uid == "" {
-		gtbackend.DebugLog(fileNameFUH, "uploadFilePage", errors.New(constant.ErrorNoUIDProvided))
-
-		http.Error(w, constant.ErrorNoUIDProvided, http.StatusBadRequest)
-		return
-	}
-
-	httpCode, err := ProcessUploadRequest(r, uid)
+	httpCode, _, err := ProcessUploadRequest(r)
 	if err != nil {
 		gtbackend.DebugLog(fileNameFUH, "uploadFilePage", err)
 
@@ -45,7 +38,16 @@ func uploadFilePage(w http.ResponseWriter, r *http.Request) {
 
 // ProcessUploadRequest - Actual processing of the file upload
 // Inspiration: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/04.5.html
-func ProcessUploadRequest(r *http.Request, uid string) (httpCode int, err error) {
+func ProcessUploadRequest(r *http.Request) (httpCode int, payload models.FilePayload, err error) {
+	uid := getUID(r)
+	if uid == "" {
+		gtbackend.DebugLog(fileNameFUH, "uploadFilePage", errors.New(constant.ErrorNoUIDProvided))
+
+		err = errors.New(constant.ErrorNoUIDProvided)
+		httpCode = http.StatusBadRequest
+		return
+	}
+
 	r.ParseMultipartForm(32 << 20)
 
 	file, handler, err := r.FormFile("file")
@@ -64,7 +66,7 @@ func ProcessUploadRequest(r *http.Request, uid string) (httpCode int, err error)
 		return
 	}
 
-	f, err := gtbackend.SaveFileToLocalStorage(uid, handler.Filename)
+	f, p, err := gtbackend.SaveFileToLocalStorage(uid, handler.Filename)
 	if err != nil {
 		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
 
@@ -76,7 +78,12 @@ func ProcessUploadRequest(r *http.Request, uid string) (httpCode int, err error)
 	io.Copy(f, file)
 
 	httpCode = http.StatusOK
-	// TODO DB entry processing comes here
+
+	payload = models.FilePayload{
+		UID:  uid,
+		Path: p,
+	}
+
 	return
 }
 
@@ -98,5 +105,11 @@ func checkFileContentType(file multipart.File, handler *multipart.FileHeader) (e
 		return
 	}
 
+	return
+}
+
+// getUID retrieves the "uid" field from a multipart/form-data request.
+func getUID(r *http.Request) (uid string) {
+	uid = r.FormValue("uid")
 	return
 }

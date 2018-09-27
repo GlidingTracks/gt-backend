@@ -8,13 +8,13 @@ import (
 )
 
 // SaveFileToLocalStorage - Save the uploaded file in the filesystem. Path: .Records/{uId}/
-func SaveFileToLocalStorage(uid string, fileNameRaw string) (file *os.File, err error) {
+func SaveFileToLocalStorage(uid string, fileNameRaw string) (file *os.File, fileName string, err error) {
 	path := createFilePath(constant.LSRoot, uid)
 	os.MkdirAll(path, os.ModePerm)
 
 	// CleanedFileName
 	cfn := cleanFilePath(fileNameRaw)
-	fileName := path + constant.Slash + cfn
+	fileName = path + constant.Slash + cfn
 
 	file, err = os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
 
