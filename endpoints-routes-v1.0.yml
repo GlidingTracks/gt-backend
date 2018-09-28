@@ -102,13 +102,17 @@
       reason: File not off correct mime. We only support .IGC
       content-type: application/json
 
-/getFileList:
+/getTracks:
   method: GET
     summary: Get list of IGC tracks
     params:
     - name: uId
-      type: String
+      type: string
       description: Requesting user id
+      required: true
+    - name: pg
+      type: string
+      description: Requested page
       required: true
     response:
     - code: 200

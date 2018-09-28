@@ -2,11 +2,13 @@ package rest
 
 import (
 	"context"
+	"encoding/json"
 	"firebase.google.com/go"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/gorilla/mux"
+	"google.golang.org/api/iterator"
 	"net/http"
 )
 
@@ -50,7 +52,25 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 }
 
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
-	gtbackend.DebugLog(fileNameDB, "getTracksPage", nil)
+
+	d, err := getTracks(dbHandler.Ctx.App)
+	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	rd, err := json.Marshal(d)
+	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(rd)
 	return
 }
 
@@ -79,7 +99,39 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 	return
 }
 
-func getTracks(app *firebase.App) (err error){
+// getTracks gets a list of tracks from the DB
+func getTracks(app *firebase.App) (d []models.IgcMetadata, err error){
+	ctx := context.Background()
+
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "getTracks", err)
+
+		return
+	}
+
+	iter := client.Collection(constant.IgcMetadata).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			gtbackend.DebugLog(fileNameDB, "getTracks", err)
+			return d, err
+		}
+		var c models.IgcMetadata
+
+		doc.DataTo(&c)
+		if err != nil {
+			gtbackend.DebugLog(fileNameDB, "getTracks", err)
+			return d, err
+		}
+
+		d = append(d, c)
+
+	}
+
 	return
 }
 

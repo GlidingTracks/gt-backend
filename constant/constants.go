@@ -7,3 +7,6 @@ const GoogleServiceCredName = "gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac6
 
 // CollectionTracks - Name of collection containing tracks in firestore.
 const CollectionTracks = "tracks"
+
+// IgcMetadata - Name of the collection containing igc metadata in firestore
+const IgcMetadata = "igc-metadata"
