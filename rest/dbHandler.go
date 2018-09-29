@@ -53,14 +53,18 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
 
-	pvfalse, own, err := getTracks(dbHandler.Ctx.App, r.Header.Get("uId"))
+	uId := r.Header.Get("uId")
+	pg := r.Header.Get("pg")
+	qt := r.Header.Get("qt")
+	ord := r.Header.Get("ord")
+	ordDir := r.Header.Get("ordDir")
+
+	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uId, pg, qt, ord, ordDir))
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-
-	d := [2][]models.IgcMetadata{own, pvfalse}
 
 	rd, err := json.Marshal(d)
 	if err != nil {
@@ -102,7 +106,7 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 }
 
 // getTracks gets a list of tracks from the DB
-func getTracks(app *firebase.App, uId string) (pvfalse []models.IgcMetadata, own []models.IgcMetadata, err error){
+func getTracks(app *firebase.App, uId string, pg int) (pvfalse []models.IgcMetadata, own []models.IgcMetadata, err error){
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
@@ -113,7 +117,8 @@ func getTracks(app *firebase.App, uId string) (pvfalse []models.IgcMetadata, own
 	}
 
 	// Not your own, public records
-	iter := client.Collection(constant.IgcMetadata).Where("Privacy", "==", false).Documents(ctx)
+	iter := client.Collection(constant.IgcMetadata).
+		Where("Privacy", "==", false).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {

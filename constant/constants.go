@@ -10,3 +10,6 @@ const CollectionTracks = "tracks"
 
 // IgcMetadata - Name of the collection containing igc metadata in firestore
 const IgcMetadata = "igc-metadata"
+
+// PageSize - Size of a page in a Firestore Query
+const PageSize = 20
