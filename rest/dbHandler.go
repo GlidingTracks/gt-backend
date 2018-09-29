@@ -53,12 +53,14 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
 
-	d, err := getTracks(dbHandler.Ctx.App)
+	pvfalse, own, err := getTracks(dbHandler.Ctx.App, r.Header.Get("uId"))
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+
+	d := [2][]models.IgcMetadata{own, pvfalse}
 
 	rd, err := json.Marshal(d)
 	if err != nil {
@@ -100,7 +102,7 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 }
 
 // getTracks gets a list of tracks from the DB
-func getTracks(app *firebase.App) (d []models.IgcMetadata, err error){
+func getTracks(app *firebase.App, uId string) (pvfalse []models.IgcMetadata, own []models.IgcMetadata, err error){
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
@@ -110,7 +112,8 @@ func getTracks(app *firebase.App) (d []models.IgcMetadata, err error){
 		return
 	}
 
-	iter := client.Collection(constant.IgcMetadata).Documents(ctx)
+	// Not your own, public records
+	iter := client.Collection(constant.IgcMetadata).Where("Privacy", "==", false).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -118,18 +121,42 @@ func getTracks(app *firebase.App) (d []models.IgcMetadata, err error){
 		}
 		if err != nil {
 			gtbackend.DebugLog(fileNameDB, "getTracks", err)
-			return d, err
+			return pvfalse, own, err
 		}
 		var c models.IgcMetadata
 
 		doc.DataTo(&c)
 		if err != nil {
 			gtbackend.DebugLog(fileNameDB, "getTracks", err)
-			return d, err
+			return pvfalse, own, err
 		}
 
-		d = append(d, c)
+		if c.UID != uId {
+			pvfalse = append(pvfalse, c)
+		}
 
+	}
+
+	// All of your own records, public and private
+	iter2 := client.Collection(constant.IgcMetadata).Where("UID", "==", uId).Documents(ctx)
+	for {
+		doc, err := iter2.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			gtbackend.DebugLog(fileNameDB, "getTracks", err)
+			return pvfalse, own, err
+		}
+		var c models.IgcMetadata
+
+		doc.DataTo(&c)
+		if err != nil {
+			gtbackend.DebugLog(fileNameDB, "getTracks", err)
+			return pvfalse, own, err
+		}
+
+		own = append(own, c)
 	}
 
 	return
