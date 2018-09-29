@@ -26,13 +26,11 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 	if query.Qt == "Personal" {
 		iter := client.Collection(constant.IgcMetadata).
 			Where("UID", "==", query.UID).
-			StartAt((query.Pg-1*constant.PageSize)+1).Limit(constant.PageSize).
 			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
 		return processIterGetTracks(iter, query, false)
 	} else {
 		iter := client.Collection(constant.IgcMetadata).
 			Where("Privacy", "==", false).
-			StartAt((query.Pg-1*constant.PageSize)+1).Limit(constant.PageSize).
 			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
 		return processIterGetTracks(iter, query, true)
 	}
@@ -41,7 +39,19 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 }
 
 func processIterGetTracks(iter *firestore.DocumentIterator, query models.FirebaseQuery, filterSelf bool) (data []models.IgcMetadata, err error) {
-	for {
+	total := 0
+	for ; total < (query.Pg - 1) * constant.PageSize; total++ {
+		iter.Next()
+		if err == iterator.Done {
+			return data, err
+		}
+		if err != nil {
+			gtbackend.DebugLog(fileNameDB, "getTracks", err)
+			return data, err
+		}
+	}
+
+	for ; total < query.Pg * constant.PageSize; total++ {
 		doc, err := iter.Next()
 		if err == iterator.Done {
 			break
@@ -52,6 +62,8 @@ func processIterGetTracks(iter *firestore.DocumentIterator, query models.Firebas
 		}
 
 		var d models.IgcMetadata
+
+		println("Object")
 
 		doc.DataTo(&d)
 		if err != nil {
