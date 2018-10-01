@@ -11,10 +11,14 @@ func TestParse(t *testing.T) {
 
 	file, err := os.Open("./testdata/testIgc.igc")
 	if err != nil {
-		t.Error("Could not open test file")
+		t.Error("Could not open test File")
 	}
 
-	md := Parse(file)
+	parser := Parser{
+		File: file,
+	}
+
+	md := parser.Parse()
 
 	t.Run("Check header parsing", func(t *testing.T) {
 		if md.Header.Pilot != "Krasimir Georgiev" {
@@ -37,12 +41,16 @@ func TestParse(t *testing.T) {
 // Utility methods
 
 func TestFileToLines(t *testing.T) {
-	file, err := os.Open("./testdata/text.txt")
+	file, err := os.Open("./testdata/testFileHRecords.txt")
 	if err != nil {
 		t.Error("Error received: ", err)
 	}
 
-	l, err := FileToLines(file)
+	parser := Parser{
+		File: file,
+	}
+
+	l, err := parser.fileToLines(file)
 
 	defer file.Close()
 
@@ -50,17 +58,40 @@ func TestFileToLines(t *testing.T) {
 		t.Error("Error received: ", err)
 	}
 
-	if len(l) != 3 {
+	if len(l) != 33 {
 		t.Error("Wrong number of lines read")
 	}
 }
 
+func TestGetHRecords(t *testing.T) {
+	file, err := os.Open("./testdata/testFileHRecords.txt")
+	if err != nil {
+		t.Error("Error received: ", err)
+	}
+
+	parser := Parser{
+		File: file,
+	}
+
+	l, err := parser.fileToLines(file)
+
+	h := parser.getHRecords(l)
+
+	if len(h) != 7 {
+		t.Error("Expected len 7 got: ", len(h))
+	}
+}
+
 func TestStrip(t *testing.T) {
+	parser := Parser{
+		File: nil,
+	}
+
 	t.Run("Normal behaviour", func(t *testing.T) {
 		testString := "Foo:bar"
 		expected := "bar"
 
-		actual := Strip(testString, ":")
+		actual := parser.strip(testString, ":")
 
 		if actual != expected {
 			t.Error("Expected: ", expected, ", got: ", actual)
@@ -71,7 +102,7 @@ func TestStrip(t *testing.T) {
 		testString := "Foobar"
 		expected := testString
 
-		actual := Strip(testString, ":")
+		actual := parser.strip(testString, ":")
 
 		if actual != expected {
 			t.Error("Expected: ", expected, ", got: ", actual)
@@ -82,7 +113,7 @@ func TestStrip(t *testing.T) {
 		testString := ""
 		expected := testString
 
-		actual := Strip(testString, ",")
+		actual := parser.strip(testString, ",")
 
 		if actual != expected {
 			t.Error("Expected: ", expected, ", got: ", actual)

@@ -15,7 +15,7 @@ func TestLocalStorage(t *testing.T) {
 
 		_, _, err := SaveFileToLocalStorage(uid, filePath)
 		if err != nil {
-			t.Error("Could not save file")
+			t.Error("Could not save File")
 		}
 
 		s := checkFileExist(uid, fileName)
@@ -27,7 +27,7 @@ func TestLocalStorage(t *testing.T) {
 	t.Run("Delete", func(t *testing.T) {
 		err := DeleteFileFromLocalStorage(uid, fileName)
 		if err != nil {
-			t.Error("Could not delete file")
+			t.Error("Could not delete File")
 		}
 
 		s := checkFileExist(uid, fileName)

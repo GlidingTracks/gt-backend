@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// SaveFileToLocalStorage - Save the uploaded file in the filesystem. Path: .Records/{uId}/
+// SaveFileToLocalStorage - Save the uploaded File in the filesystem. Path: .Records/{uId}/
 func SaveFileToLocalStorage(uid string, fileNameRaw string) (file *os.File, fileName string, err error) {
 	path := createFilePath(constant.LSRoot, uid)
 	os.MkdirAll(path, os.ModePerm)
@@ -21,7 +21,7 @@ func SaveFileToLocalStorage(uid string, fileNameRaw string) (file *os.File, file
 	return
 }
 
-// DeleteFileFromLocalStorage takes a uid and a filename and deletes a file determined
+// DeleteFileFromLocalStorage takes a uid and a filename and deletes a File determined
 // by the params
 func DeleteFileFromLocalStorage(uid string, fileName string) (err error) {
 	path := createFilePath(constant.LSRoot, uid, fileName)

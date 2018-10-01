@@ -57,7 +57,11 @@ func main() {
 		fmt.Print(err)
 	}
 
-	gtbackend.Parse(f)
+	parser := gtbackend.Parser{
+		File: f,
+	}
+
+	parser.Parse()
 	logrus.Fatal(http.ListenAndServe(":8080", r))
 
 }
