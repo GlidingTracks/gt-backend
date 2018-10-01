@@ -16,8 +16,8 @@ const fileNameDB = "dbHandler.go"
 type DbHandler struct {
 	Ctx         Context
 	InsertTrack string
-	GetTracks string
-	GetTrack string
+	GetTracks   string
+	GetTrack    string
 	DeleteTrack string
 }
 
@@ -78,14 +78,14 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 	return
 }
 
-func getTracks(app *firebase.App) (err error){
+func getTracks(app *firebase.App) (err error) {
 	return
 }
 
-func getTrack(app *firebase.App, trackID string) (err error){
+func getTrack(app *firebase.App, trackID string) (err error) {
 	return
 }
 
-func deleteTrack(app *firebase.App, trackID string) (err error){
+func deleteTrack(app *firebase.App, trackID string) (err error) {
 	return
 }
