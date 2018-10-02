@@ -7,6 +7,7 @@
 # 13.09.2018 - added endpoint for updating a user. Added more response options for createUser
 # 13.09.2018 - added endpoints for uploading a file
 # 14.09.2018 - added endpoint for deleting a user and getting a user
+# 27.09.2018 - added endpoint for showing a list of tracks
 # 27.09.2018 - added endpoint for inserting a track record in DB
 #####################################################################
 
@@ -99,6 +100,29 @@
       content-type: application/json
     - code: 415
       reason: File not off correct mime. We only support .IGC
+      content-type: application/json
+
+/getTracks:
+  method: GET
+    summary: Get list of IGC tracks
+    params:
+    - name: uId
+      type: string
+      description: Requesting user id
+      required: true
+    - name: pg
+      type: string
+      description: Requested page
+      required: true
+    response:
+    - code: 200
+      description: List fetched successfully
+      content-type: application/json
+    - code: 400
+      description: bad request, cannot handle the request
+      content-type: application/json
+    - code: 403
+      description: unauthorized, user id cannot be authenticated
       content-type: application/json
 
 /insertTrack:
