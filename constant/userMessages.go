@@ -12,7 +12,7 @@ const ErrorCouldNotContactFirebase = "failed to contact firebase"
 // ErrorNotImplemented - User tried accessing method marked 'not implemented'.
 const ErrorNotImplemented = "not implemented"
 
-// ErrorCouldBodyFailed - could not process request body.
+// ErrorProcessBodyFailed - could not process request body.
 const ErrorProcessBodyFailed = "failed to process request body"
 
 // ErrorCouldNotCreateUser - could not create new user.
@@ -24,7 +24,7 @@ const ErrorCouldNotGetUser = "failed to fetch requested user"
 // ErrorCouldNotUpdateUser - could not update user.
 const ErrorCouldNotUpdateUser = "failed to update requested user, make sure user exists"
 
-// ErrorCouldNotDeleteUser - could not delete user.
+// ErrorDeleteUser - could not delete user.
 const ErrorDeleteUser = "failed to delete user"
 
 // ErrorInvalidContentType - not a igc file
