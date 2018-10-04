@@ -1,13 +1,12 @@
 package gtbackend
 
 import (
-	"strconv"
 	"testing"
 	"time"
 )
 
 func TestGetUnixTime(t *testing.T) {
-	expected := strconv.FormatInt(time.Now().Unix(), 10)
+	expected := time.Now().Unix()
 	actual := GetUnixTime()
 
 	if expected != actual {
