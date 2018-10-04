@@ -10,75 +10,75 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-// getTracks gets a list of tracks from the DB
-func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error) {
+// GetTracks gets a list of IgcMetadata from Firebase based on query
+func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error){
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
 	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "getTracks", err)
-
+		gtbackend.DebugLog(fileNameDB, "GetTracks", err)
 		return
 	}
 
-	println(query.Qt + " - " + query.UID)
-
-	if query.Qt == "Personal" {
+	// Start query to Firebase based on the Query Type
+	if query.Qt == "Private" {
 		iter := client.Collection(constant.IgcMetadata).
 			Where("UID", "==", query.UID).
 			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
-		return processIterGetTracks(iter, query, false)
+		return processIterGetTracks(iter, query.Pg, "")
 	} else {
 		iter := client.Collection(constant.IgcMetadata).
 			Where("Privacy", "==", false).
 			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
-		return processIterGetTracks(iter, query, true)
+		return processIterGetTracks(iter, query.Pg, query.UID)
 	}
 
 	return data, err
 }
 
-func processIterGetTracks(iter *firestore.DocumentIterator, query models.FirebaseQuery, filterSelf bool) (data []models.IgcMetadata, err error) {
-	total := 0
-	for ; total < (query.Pg-1)*constant.PageSize; total++ {
-		iter.Next()
-		if err == iterator.Done {
-			return data, err
-		}
-		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "getTracks", err)
-			return data, err
-		}
-	}
+/** processIterGetTracks
+	Processes the request made to Firebase based
+	iter *firestore.DocumentIterator Iterator with the results from firestore
+	pg int Page to retrieve
+	filterUID string Filter UID to remove from the results
+ */
+func processIterGetTracks(
+	iter *firestore.DocumentIterator,
+	pg int,
+	filterUID string) (
+	data []models.IgcMetadata,
+	err error) {
+	pageItemSkip := (pg - 1) * constant.PageSize
 
-	for ; total < query.Pg*constant.PageSize; total++ {
+	// Process track query until length of data is the size of a page
+	for ; len(data) < constant.PageSize; {
 		doc, err := iter.Next()
+
+		// Early break if there is no more data (last page)
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "getTracks", err)
+			gtbackend.DebugLog(fileNameDB, "processIterGetTracks", err)
 			return data, err
 		}
 
+		// Convert doc to our model
 		var d models.IgcMetadata
-
-		println("Object")
-
-		doc.DataTo(&d)
+		err = doc.DataTo(&d)
 		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "getTracks", err)
+			gtbackend.DebugLog(fileNameDB, "processIterGetTracks", err)
 			return data, err
 		}
 
-		if filterSelf {
-			if d.UID != query.UID {
+		// Filter out matching UID and add to data
+		if d.UID != filterUID {
+			if pageItemSkip > 0 {
+				pageItemSkip--
+			} else {
 				data = append(data, d)
 			}
-		} else {
-			data = append(data, d)
 		}
-
 	}
 
 	return data, err
