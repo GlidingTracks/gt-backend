@@ -11,7 +11,7 @@ import (
 )
 
 // getTracks gets a list of tracks from the DB
-func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error){
+func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error) {
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
@@ -40,7 +40,7 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 
 func processIterGetTracks(iter *firestore.DocumentIterator, query models.FirebaseQuery, filterSelf bool) (data []models.IgcMetadata, err error) {
 	total := 0
-	for ; total < (query.Pg - 1) * constant.PageSize; total++ {
+	for ; total < (query.Pg-1)*constant.PageSize; total++ {
 		iter.Next()
 		if err == iterator.Done {
 			return data, err
@@ -51,7 +51,7 @@ func processIterGetTracks(iter *firestore.DocumentIterator, query models.Firebas
 		}
 	}
 
-	for ; total < query.Pg * constant.PageSize; total++ {
+	for ; total < query.Pg*constant.PageSize; total++ {
 		doc, err := iter.Next()
 		if err == iterator.Done {
 			break

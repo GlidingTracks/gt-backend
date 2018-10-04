@@ -12,8 +12,12 @@ func TestLocalStorage(t *testing.T) {
 	fileName := "text.txt"
 
 	t.Run("Save", func(t *testing.T) {
+		f, err := os.Open(filePath)
+		if err != nil {
+			t.Error("Could not open test file: ", filePath)
+		}
 
-		_, _, err := SaveFileToLocalStorage(uid, filePath)
+		_, _, err = SaveFileToLocalStorage(uid, filePath, f)
 		if err != nil {
 			t.Error("Could not save File")
 		}

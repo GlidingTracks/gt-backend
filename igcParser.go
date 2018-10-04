@@ -32,21 +32,32 @@ type H struct {
 	GliderID           string
 	FirmwareVersion    string
 	HardwareVersion    string
+	Date               string
 }
 
 // Parser holds a file, mostly done to keep as much as possible private,
 // while also support testing
 type Parser struct {
-	File *os.File
+	Path string
 }
 
 // Parse - main routine for parsing a IGC-track. Returns a Record
 func (parser Parser) Parse() (rec Record) {
-	l, _ := parser.fileToLines(parser.File)
+	f, err := parser.openFile()
+	if err != nil {
+		return
+	}
+
+	l, _ := parser.fileToLines(f)
+
+	defer f.Close()
+
+	if len(l) == 0 {
+		logrus.Info("No lines in file")
+		return
+	}
 
 	h := parser.getHRecords(l)
-
-	defer parser.File.Close()
 
 	rec.Manufacturer = parseA(l[0])
 	rec.Header = parser.parseH(h)
@@ -90,6 +101,8 @@ func (parser Parser) parseH(hRecords []string) (header H) {
 		case "RHW":
 			header.HardwareVersion = v
 			break
+		case "DTE":
+			header.Date = v[0:6]
 		default:
 			logrus.Info("Unsupported key: ", k)
 		}
@@ -121,5 +134,10 @@ func (parser Parser) getHRecords(records []string) (h []string) {
 			h = append(h, records[i])
 		}
 	}
+	return
+}
+
+func (parser Parser) openFile() (file *os.File, err error) {
+	file, err = os.Open(parser.Path)
 	return
 }
