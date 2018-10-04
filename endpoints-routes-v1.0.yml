@@ -9,7 +9,7 @@
 # 14.09.2018 - added endpoint for deleting a user and getting a user
 # 27.09.2018 - added endpoint for showing a list of tracks
 # 27.09.2018 - added endpoint for inserting a track record in DB
-# 04.10.2018 - added correct header for /insertTrack
+# 04.10.2018 - added correct header for /insertTrack + private field
 #####################################################################
 
 /createUser:
@@ -134,6 +134,10 @@
     - name: uid
       type: string, form-data
       description: Uploading user's id
+      required: true
+    - name: private
+      type: boolean, form-data
+      description: file private/public
       required: true
     - name: file
       type: string, form-data
