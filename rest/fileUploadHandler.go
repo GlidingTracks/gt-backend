@@ -6,7 +6,6 @@ import (
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/gorilla/mux"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"strings"
@@ -50,7 +49,7 @@ func ProcessUploadRequest(r *http.Request) (httpCode int, payload models.FilePay
 
 	r.ParseMultipartForm(32 << 20)
 
-	file, handler, err := r.FormFile("file")
+	src, handler, err := r.FormFile("file")
 	if err != nil {
 		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
 
@@ -58,24 +57,23 @@ func ProcessUploadRequest(r *http.Request) (httpCode int, payload models.FilePay
 		return
 	}
 
-	defer file.Close()
+	defer src.Close()
 
-	err = checkFileContentType(file, handler)
+	err = checkFileContentType(src, handler)
 	if err != nil {
 		httpCode = http.StatusUnsupportedMediaType
 		return
 	}
 
-	f, p, err := gtbackend.SaveFileToLocalStorage(uid, handler.Filename)
+	f, p, err := gtbackend.SaveFileToLocalStorage(uid, handler.Filename, src)
 	if err != nil {
 		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
 
 		httpCode = http.StatusBadRequest
 		return
 	}
-	defer f.Close()
 
-	io.Copy(f, file)
+	defer f.Close()
 
 	httpCode = http.StatusOK
 
@@ -97,6 +95,9 @@ func checkFileContentType(file multipart.File, handler *multipart.FileHeader) (e
 
 		return
 	}
+
+	// Reset seeker in file
+	file.Seek(0, 0)
 
 	content := http.DetectContentType(buff)
 

@@ -1,14 +1,13 @@
 package models
 
-type IgcRecordMetadata struct {
-	DummyString string
-}
+import "github.com/GlidingTracks/gt-backend"
 
-// FilePayload - Client side payload for inserting a track.
+// IgcMetadata - Contains all metadata from a IGC file as well as some
+// additional data.
 type IgcMetadata struct {
-	Privacy  bool
-	Time string
-	UID string
-	Record IgcRecordMetadata
+	Privacy bool
+	Time    int64
+	UID     string
+	Record  gtbackend.Record
+	TrackID string
 }
-

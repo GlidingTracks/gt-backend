@@ -17,8 +17,8 @@ const fileNameDB = "dbHandler.go"
 type DbHandler struct {
 	Ctx         Context
 	InsertTrack string
-	GetTracks string
-	GetTrack string
+	GetTracks   string
+	GetTrack    string
 	DeleteTrack string
 }
 
@@ -40,7 +40,10 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 		http.Error(w, err.Error(), c)
 	}
 
-	err = insertTrackRecord(dbHandler.Ctx.App, n)
+	isPrivate := r.FormValue("private")
+	bp := gtbackend.GetBoolFromString(isPrivate)
+
+	err = insertTrackRecord(dbHandler.Ctx.App, n, bp)
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
 
@@ -74,6 +77,7 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+
 	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
@@ -90,7 +94,7 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 }
 
 // insertTrackRecord saves a FilePayload struct to the DB.
-func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error) {
+func insertTrackRecord(app *firebase.App, record models.FilePayload, isPrivate bool) (err error) {
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
@@ -98,7 +102,27 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 		return
 	}
 
-	_, _, err = client.Collection(constant.CollectionTracks).Add(ctx, record)
+	cr, _, err := client.Collection(constant.CollectionTracks).Add(ctx, record)
+	if err != nil {
+		return
+	}
+
+	parser := gtbackend.Parser{
+		Path: record.Path,
+	}
+
+	pIGC := parser.Parse()
+
+	md := &models.IgcMetadata{
+		Privacy: isPrivate,
+		Time:    gtbackend.GetUnixTime(),
+		UID:     record.UID,
+		Record:  pIGC,
+		TrackID: cr.ID,
+	}
+
+	// TODO, maybe validate md somehow before pushing it to db
+	_, _, err = client.Collection(constant.IgcMetadata).Add(ctx, md)
 	if err != nil {
 		return
 	}
@@ -110,6 +134,6 @@ func getTrack(app *firebase.App, trackID string) (err error){
 	return
 }
 
-func deleteTrack(app *firebase.App, trackID string) (err error){
+func deleteTrack(app *firebase.App, trackID string) (err error) {
 	return
 }
