@@ -30,10 +30,10 @@ type UserHandler struct {
 
 // Bind sets up the routes to the mux router.
 func (userHandler UserHandler) Bind(r *mux.Router) {
-	r.HandleFunc("/createUser", userHandler.createUserPage).Methods(constant.Post)
-	r.HandleFunc("/updateUser", userHandler.updateUserPage).Methods(constant.Post)
-	r.HandleFunc("/deleteUser", userHandler.deleteUserPage).Queries("uId", "{uId}")
-	r.HandleFunc("/getUser", userHandler.getUserPage).Queries("uId", "{uId}")
+	r.HandleFunc(userHandler.CreateUserPage, userHandler.createUserPage).Methods(constant.Post)
+	r.HandleFunc(userHandler.UpdateUserPage, userHandler.updateUserPage).Methods(constant.Post)
+	r.HandleFunc(userHandler.DeleteUserPage, userHandler.deleteUserPage).Queries("uId", "{uId}")
+	r.HandleFunc(userHandler.GetUserPage, userHandler.getUserPage).Queries("uId", "{uId}")
 }
 
 // createUserPage is the handler for creating users.

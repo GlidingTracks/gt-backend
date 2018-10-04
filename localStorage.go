@@ -2,26 +2,30 @@ package gtbackend
 
 import (
 	"github.com/GlidingTracks/gt-backend/constant"
+	"io"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-// SaveFileToLocalStorage - Save the uploaded file in the filesystem. Path: .Records/{uId}/
-func SaveFileToLocalStorage(uid string, fileNameRaw string) (file *os.File, err error) {
+// SaveFileToLocalStorage - Save the uploaded File in the filesystem. Path: .Records/{uId}/
+func SaveFileToLocalStorage(uid string, fileNameRaw string, src multipart.File) (file *os.File, fileName string, err error) {
 	path := createFilePath(constant.LSRoot, uid)
 	os.MkdirAll(path, os.ModePerm)
 
 	// CleanedFileName
 	cfn := cleanFilePath(fileNameRaw)
-	fileName := path + constant.Slash + cfn
+	fileName = path + constant.Slash + cfn
 
 	file, err = os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
+
+	io.Copy(file, src)
 
 	return
 }
 
-// DeleteFileFromLocalStorage takes a uid and a filename and deletes a file determined
+// DeleteFileFromLocalStorage takes a uid and a filename and deletes a File determined
 // by the params
 func DeleteFileFromLocalStorage(uid string, fileName string) (err error) {
 	path := createFilePath(constant.LSRoot, uid, fileName)
