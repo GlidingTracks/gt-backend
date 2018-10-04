@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"firebase.google.com/go"
-	"fmt"
-	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/rest"
 	"github.com/Sirupsen/logrus"
@@ -12,7 +10,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"net/http"
-	"os"
 )
 
 // main is the first entry-point in application.
@@ -52,18 +49,8 @@ func main() {
 	dbRoutes.Bind(r)
 
 	r.HandleFunc("/", startPage)
-	f, err := os.Open("./testdata/testIgc.igc")
-	if err != nil {
-		fmt.Print(err)
-	}
 
-	parser := gtbackend.Parser{
-		File: f,
-	}
-
-	parser.Parse()
 	logrus.Fatal(http.ListenAndServe(":8080", r))
-
 }
 
 // startPage redirects every non-existing path to url: localhost:8080/.

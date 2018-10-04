@@ -9,6 +9,7 @@
 # 14.09.2018 - added endpoint for deleting a user and getting a user
 # 27.09.2018 - added endpoint for showing a list of tracks
 # 27.09.2018 - added endpoint for inserting a track record in DB
+# 04.10.2018 - added correct header for /insertTrack
 #####################################################################
 
 /createUser:
@@ -127,14 +128,15 @@
 
 /insertTrack:
   method: POST
+    header: multipart/form-data
     summary: Upload a IGC file to the server
     params:
     - name: uid
-      type: string
+      type: string, form-data
       description: Uploading user's id
       required: true
     - name: file
-      type: string
+      type: string, form-data
       description:
       required: true
     responses:

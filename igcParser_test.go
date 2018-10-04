@@ -9,13 +9,8 @@ import (
 func TestParse(t *testing.T) {
 	logrus.SetLevel(logrus.ErrorLevel)
 
-	file, err := os.Open("./testdata/testIgc.igc")
-	if err != nil {
-		t.Error("Could not open test File")
-	}
-
 	parser := Parser{
-		File: file,
+		Path: "./testdata/testIgc.igc",
 	}
 
 	md := parser.Parse()
@@ -47,7 +42,7 @@ func TestFileToLines(t *testing.T) {
 	}
 
 	parser := Parser{
-		File: file,
+		Path: "",
 	}
 
 	l, err := parser.fileToLines(file)
@@ -70,7 +65,7 @@ func TestGetHRecords(t *testing.T) {
 	}
 
 	parser := Parser{
-		File: file,
+		Path: "",
 	}
 
 	l, err := parser.fileToLines(file)
@@ -84,7 +79,7 @@ func TestGetHRecords(t *testing.T) {
 
 func TestStrip(t *testing.T) {
 	parser := Parser{
-		File: nil,
+		Path: "",
 	}
 
 	t.Run("Normal behaviour", func(t *testing.T) {

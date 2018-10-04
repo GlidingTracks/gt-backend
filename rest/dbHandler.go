@@ -41,6 +41,7 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 		http.Error(w, err.Error(), c)
 	}
 
+	// Innocent
 	err = insertTrackRecord(dbHandler.Ctx.App, n)
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
@@ -53,13 +54,13 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
 
-	uId := r.Header.Get("uId")
+	uID := r.Header.Get("uId")
 	pg := r.Header.Get("pg")
 	qt := r.Header.Get("qt")
 	ord := r.Header.Get("ord")
 	ordDir := r.Header.Get("ordDir")
 
-	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uId, pg, qt, ord, ordDir))
+	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, pg, qt, ord, ordDir))
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
@@ -72,7 +73,6 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
@@ -97,7 +97,27 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 		return
 	}
 
-	_, _, err = client.Collection(constant.CollectionTracks).Add(ctx, record)
+	cr, _, err := client.Collection(constant.CollectionTracks).Add(ctx, record)
+	if err != nil {
+		return
+	}
+
+	parser := gtbackend.Parser{
+		Path: record.Path,
+	}
+
+	pIGC := parser.Parse()
+
+	md := &models.IgcMetadata{
+		Privacy: false,
+		Time:    gtbackend.GetUnixTime(),
+		UID:     record.UID,
+		Record:  pIGC,
+		TrackID: cr.ID,
+	}
+
+	// TODO, maybe validate md somehow before pushing it to db
+	_, _, err = client.Collection(constant.IgcMetadata).Add(ctx, md)
 	if err != nil {
 		return
 	}
@@ -106,7 +126,7 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 }
 
 // getTracks gets a list of tracks from the DB
-func getTracks(app *firebase.App, uId string, pg int) (pvfalse []models.IgcMetadata, own []models.IgcMetadata, err error){
+func getTracks(app *firebase.App, uID string, pg int) (pvfalse []models.IgcMetadata, own []models.IgcMetadata, err error) {
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
@@ -136,14 +156,14 @@ func getTracks(app *firebase.App, uId string, pg int) (pvfalse []models.IgcMetad
 			return pvfalse, own, err
 		}
 
-		if c.UID != uId {
+		if c.UID != uID {
 			pvfalse = append(pvfalse, c)
 		}
 
 	}
 
 	// All of your own records, public and private
-	iter2 := client.Collection(constant.IgcMetadata).Where("UID", "==", uId).Documents(ctx)
+	iter2 := client.Collection(constant.IgcMetadata).Where("UID", "==", uID).Documents(ctx)
 	for {
 		doc, err := iter2.Next()
 		if err == iterator.Done {
