@@ -41,8 +41,10 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 		http.Error(w, err.Error(), c)
 	}
 
-	// Innocent
-	err = insertTrackRecord(dbHandler.Ctx.App, n)
+	isPrivate := r.FormValue("private")
+	bp := gtbackend.GetBoolFromString(isPrivate)
+
+	err = insertTrackRecord(dbHandler.Ctx.App, n, bp)
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
 
@@ -89,7 +91,7 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 }
 
 // insertTrackRecord saves a FilePayload struct to the DB.
-func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error) {
+func insertTrackRecord(app *firebase.App, record models.FilePayload, isPrivate bool) (err error) {
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
@@ -109,7 +111,7 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload) (err error)
 	pIGC := parser.Parse()
 
 	md := &models.IgcMetadata{
-		Privacy: false,
+		Privacy: isPrivate,
 		Time:    gtbackend.GetUnixTime(),
 		UID:     record.UID,
 		Record:  pIGC,
