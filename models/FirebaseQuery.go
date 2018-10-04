@@ -24,9 +24,11 @@ type FirebaseQuery struct {
 	OrdDir firestore.Direction
 }
 
+// NewFirebaseQuery
+// Initializes the query with values from strings (from header), sets Pg = 1 and OrdDir = Asc as default
 func NewFirebaseQuery(u string, p string, q string, o string, od string) FirebaseQuery {
 	pint, err := strconv.Atoi(p)
-	if err != nil {
+	if err != nil || pint < 1 {
 		pint = 1
 
 		gtbackend.DebugLog(filenameFQ, "getTracksPage", err)

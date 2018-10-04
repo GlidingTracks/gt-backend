@@ -8,7 +8,6 @@ import (
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/gorilla/mux"
-	"google.golang.org/api/iterator"
 	"net/http"
 )
 
@@ -54,21 +53,23 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 	w.WriteHeader(c)
 }
 
+// getTracksPage retrieves a page of track metadata for the user
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
+	// Extract data from header
+	uId := r.Header.Get("uid")
+	pg := r.Header.Get("page")
+	qt := r.Header.Get("queryType")
+	ordDir := r.Header.Get("orderDirection")
 
-	uID := r.Header.Get("uId")
-	pg := r.Header.Get("pg")
-	qt := r.Header.Get("qt")
-	ord := r.Header.Get("ord")
-	ordDir := r.Header.Get("ordDir")
-
-	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, pg, qt, ord, ordDir))
+	// Process request
+	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uId, pg, qt, "Time", ordDir))
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+	// Convert to JSON
 	rd, err := json.Marshal(d)
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
@@ -76,6 +77,7 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(rd)
@@ -127,69 +129,7 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload, isPrivate b
 	return
 }
 
-// getTracks gets a list of tracks from the DB
-func getTracks(app *firebase.App, uID string, pg int) (pvfalse []models.IgcMetadata, own []models.IgcMetadata, err error) {
-	ctx := context.Background()
-
-	client, err := app.Firestore(ctx)
-	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "getTracks", err)
-
-		return
-	}
-
-	// Not your own, public records
-	iter := client.Collection(constant.IgcMetadata).
-		Where("Privacy", "==", false).Documents(ctx)
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "getTracks", err)
-			return pvfalse, own, err
-		}
-		var c models.IgcMetadata
-
-		doc.DataTo(&c)
-		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "getTracks", err)
-			return pvfalse, own, err
-		}
-
-		if c.UID != uID {
-			pvfalse = append(pvfalse, c)
-		}
-
-	}
-
-	// All of your own records, public and private
-	iter2 := client.Collection(constant.IgcMetadata).Where("UID", "==", uID).Documents(ctx)
-	for {
-		doc, err := iter2.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "getTracks", err)
-			return pvfalse, own, err
-		}
-		var c models.IgcMetadata
-
-		doc.DataTo(&c)
-		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "getTracks", err)
-			return pvfalse, own, err
-		}
-
-		own = append(own, c)
-	}
-
-	return
-}
-
-func getTrack(app *firebase.App, trackID string) (err error) {
+func getTrack(app *firebase.App, trackID string) (err error){
 	return
 }
 
