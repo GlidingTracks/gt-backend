@@ -18,7 +18,7 @@ func TestGetTracks(t *testing.T) {
 		logrus.Fatalf("error initializing app: %v\n", err)
 	}
 
-	testUID := "test2"
+	testUID := "iP1dgAHJ2JNce4hGr9H0RugkCHP2"
 	privateQ := models.NewFirebaseQuery(testUID, "1", "Private", "Time", "Asc")
 
 	res, err := GetTracks(app, privateQ)
@@ -38,7 +38,7 @@ func TestGetTracks(t *testing.T) {
 
 	res, err = GetTracks(app, publicQ)
 	if err != nil {
-		t.Error("GetTracks failed private test!")
+		t.Error("GetTracks failed public test!")
 	}
 	if len(res) < 1 {
 		t.Error("GetTracks public test with no results!")
