@@ -107,24 +107,24 @@
   method: GET
     summary: Get list of IGC tracks
     params:
-    - name: UserID
+    - name: uid
       type: string
       description: Requesting user id
       required: true
-    - name: Page
+    - name: page
       type: string
       description: Requested page
       required: false (default = 1)
-    - name: QueryType
+    - name: queryType
       type: string
       description: Type of query to be made
       available: Private, Public
       required: false (default = Public)
-    - name: Order (DISABLED)
+    - name: order (DISABLED)
       type: string
       description: What to order the search on
       required: false (default = Time)
-    - name: OrderDirection
+    - name: orderDirection
       type: string
       description: Direction of the order
       required: false (default = Asc)

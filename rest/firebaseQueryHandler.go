@@ -36,7 +36,7 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 	return data, err
 }
 
-/**
+/** processIterGetTracks
 	Processes the request made to Firebase based
 	iter *firestore.DocumentIterator Iterator with the results from firestore
 	pg int Page to retrieve

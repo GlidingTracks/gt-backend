@@ -56,10 +56,10 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 // getTracksPage retrieves a page of track metadata for the user
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
 	// Extract data from header
-	uId := r.Header.Get("UserID")
-	pg := r.Header.Get("Page")
-	qt := r.Header.Get("QueryType")
-	ordDir := r.Header.Get("OrderDirection")
+	uId := r.Header.Get("uid")
+	pg := r.Header.Get("page")
+	qt := r.Header.Get("queryType")
+	ordDir := r.Header.Get("orderDirection")
 
 	// Process request
 	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uId, pg, qt, "Time", ordDir))
