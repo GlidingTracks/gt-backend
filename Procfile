@@ -1,1 +1,1 @@
-web: gt-backend/build
+web: build
