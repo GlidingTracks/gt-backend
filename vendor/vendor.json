@@ -669,9 +669,5 @@
 			"revisionTime": "2018-09-25T21:15:54Z"
 		}
 	],
-	"rootPath": "github.com/GlidingTracks/gt-backend",
-	"heroku": {
-		"install": [ "./..." ],
-		"goVersion": "go1.9"
-	}
+	"rootPath": "github.com/GlidingTracks/gt-backend"
 }
