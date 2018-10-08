@@ -57,13 +57,13 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 // getTracksPage retrieves a page of track metadata for the user
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
 	// Extract data from header
-	uId := r.Header.Get("uid")
+	uID := r.Header.Get("uid")
 	pg := r.Header.Get("page")
 	qt := r.Header.Get("queryType")
 	ordDir := r.Header.Get("orderDirection")
 
 	// Process request
-	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uId, pg, qt, "Time", ordDir))
+	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, pg, qt, "Time", ordDir))
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
@@ -130,7 +130,7 @@ func insertTrackRecord(app *firebase.App, record models.FilePayload, isPrivate b
 	return
 }
 
-func getTrack(app *firebase.App, trackID string) (err error){
+func getTrack(app *firebase.App, trackID string) (err error) {
 	return
 }
 

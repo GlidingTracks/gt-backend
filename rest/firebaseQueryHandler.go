@@ -11,7 +11,7 @@ import (
 )
 
 // GetTracks gets a list of IgcMetadata from Firebase based on query
-func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error){
+func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error) {
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
@@ -37,11 +37,11 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 }
 
 /** processIterGetTracks
-	Processes the request made to Firebase based
-	iter *firestore.DocumentIterator Iterator with the results from firestore
-	pg int Page to retrieve
-	filterUID string Filter UID to remove from the results
- */
+Processes the request made to Firebase based
+iter *firestore.DocumentIterator Iterator with the results from firestore
+pg int Page to retrieve
+filterUID string Filter UID to remove from the results
+*/
 func processIterGetTracks(
 	iter *firestore.DocumentIterator,
 	pg int,
@@ -51,7 +51,7 @@ func processIterGetTracks(
 	pageItemSkip := (pg - 1) * constant.PageSize
 
 	// Process track query until length of data is the size of a page
-	for ; len(data) < constant.PageSize; {
+	for len(data) < constant.PageSize {
 		doc, err := iter.Next()
 
 		// Early break if there is no more data (last page)
@@ -72,7 +72,7 @@ func processIterGetTracks(
 		}
 
 		// Filter out matching UID and add to data
-		if d.UID != filterUID && d.UID != ""{
+		if d.UID != filterUID && d.UID != "" {
 			if pageItemSkip > 0 {
 				pageItemSkip--
 			} else {
