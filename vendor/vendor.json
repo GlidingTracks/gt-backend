@@ -672,6 +672,6 @@
 	"rootPath": "github.com/GlidingTracks/gt-backend",
 	"heroku": {
 		"install": [ "./..." ],
-		"goVersion": "go1.9.2"
+		"goVersion": "go1.9"
 	}
 }
