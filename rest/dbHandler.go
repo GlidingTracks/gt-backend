@@ -38,6 +38,7 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
 
 		http.Error(w, err.Error(), c)
+		return
 	}
 
 	isPrivate := r.FormValue("private")

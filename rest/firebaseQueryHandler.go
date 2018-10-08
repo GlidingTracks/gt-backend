@@ -17,7 +17,6 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 	client, err := app.Firestore(ctx)
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "GetTracks", err)
-
 		return
 	}
 
@@ -26,17 +25,15 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 		iter := client.Collection(constant.IgcMetadata).
 			Where("UID", "==", query.UID).
 			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
-
-		data, err = processIterGetTracks(iter, query.Pg, "")
-		return
+		return processIterGetTracks(iter, query.Pg, "")
+	} else {
+		iter := client.Collection(constant.IgcMetadata).
+			Where("Privacy", "==", false).
+			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
+		return processIterGetTracks(iter, query.Pg, query.UID)
 	}
 
-	iter := client.Collection(constant.IgcMetadata).
-		Where("Privacy", "==", false).
-		OrderBy(query.Ord, query.OrdDir).Documents(ctx)
-
-	data, err = processIterGetTracks(iter, query.Pg, query.UID)
-	return
+	return data, err
 }
 
 /** processIterGetTracks
@@ -75,7 +72,7 @@ func processIterGetTracks(
 		}
 
 		// Filter out matching UID and add to data
-		if d.UID != filterUID {
+		if d.UID != filterUID && d.UID != "" {
 			if pageItemSkip > 0 {
 				pageItemSkip--
 			} else {
