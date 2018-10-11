@@ -19,7 +19,7 @@ func TestGetTracks(t *testing.T) {
 	}
 
 	testUID := "iP1dgAHJ2JNce4hGr9H0RugkCHP2"
-	privateQ := models.NewFirebaseQuery(testUID, "1", "Private", "Time", "Asc")
+	privateQ := models.NewFirebaseQuery(testUID, "1", "Private", "Asc")
 
 	res, err := GetTracks(app, privateQ)
 	if err != nil {
@@ -34,7 +34,7 @@ func TestGetTracks(t *testing.T) {
 		}
 	}
 
-	publicQ := models.NewFirebaseQuery(testUID, "1", "Public", "Time", "Asc")
+	publicQ := models.NewFirebaseQuery(testUID, "1", "Public", "Asc")
 
 	res, err = GetTracks(app, publicQ)
 	if err != nil {

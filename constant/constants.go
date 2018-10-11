@@ -13,3 +13,6 @@ const IgcMetadata = "igc-metadata"
 
 // PageSize - Size of a page in a Firestore Query
 const PageSize = 20
+
+// FirebaseQueryOrder - What to order the Firestore Query with (time)
+const FirebaseQueryOrder = "Time"

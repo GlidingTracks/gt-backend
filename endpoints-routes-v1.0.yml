@@ -111,19 +111,15 @@
       type: string
       description: Requesting user id
       required: true
-    - name: page
+    - name: timeSkip
       type: string
-      description: Requested page
+      description: Skip to after this timestamp
       required: false (default = 1)
     - name: queryType
       type: string
       description: Type of query to be made
       available: Private, Public
       required: false (default = Public)
-    - name: order (DISABLED)
-      type: string
-      description: What to order the search on
-      required: false (default = Time)
     - name: orderDirection
       type: string
       description: Direction of the order
