@@ -24,13 +24,15 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 	if query.Qt == "Private" {
 		iter := client.Collection(constant.IgcMetadata).
 			Where("UID", "==", query.UID).
-			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
-		return processIterGetTracks(iter, query.Pg, "")
+			OrderBy(constant.FirebaseQueryOrder, query.OrdDir).
+			StartAfter(query.TmSk).Documents(ctx)
+		return processIterGetTracks(iter, "")
 	} else {
 		iter := client.Collection(constant.IgcMetadata).
 			Where("Privacy", "==", false).
-			OrderBy(query.Ord, query.OrdDir).Documents(ctx)
-		return processIterGetTracks(iter, query.Pg, query.UID)
+			OrderBy(constant.FirebaseQueryOrder, query.OrdDir).
+			StartAfter(query.TmSk).Documents(ctx)
+		return processIterGetTracks(iter, query.UID)
 	}
 
 	return data, err
@@ -39,17 +41,9 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 /** processIterGetTracks
 Processes the request made to Firebase based
 iter *firestore.DocumentIterator Iterator with the results from firestore
-pg int Page to retrieve
 filterUID string Filter UID to remove from the results
 */
-func processIterGetTracks(
-	iter *firestore.DocumentIterator,
-	pg int,
-	filterUID string) (
-	data []models.IgcMetadata,
-	err error) {
-	pageItemSkip := (pg - 1) * constant.PageSize
-
+func processIterGetTracks(iter *firestore.DocumentIterator, filterUID string) (data []models.IgcMetadata, err error) {
 	// Process track query until length of data is the size of a page
 	for len(data) < constant.PageSize {
 		doc, err := iter.Next()
@@ -73,11 +67,7 @@ func processIterGetTracks(
 
 		// Filter out matching UID and add to data
 		if d.UID != filterUID && d.UID != "" {
-			if pageItemSkip > 0 {
-				pageItemSkip--
-			} else {
-				data = append(data, d)
-			}
+			data = append(data, d)
 		}
 	}
 

@@ -58,12 +58,12 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
 	// Extract data from header
 	uID := r.Header.Get("uid")
-	pg := r.Header.Get("page")
+	tmsk := r.Header.Get("timeSkip")
 	qt := r.Header.Get("queryType")
 	ordDir := r.Header.Get("orderDirection")
 
 	// Process request
-	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, pg, qt, "Time", ordDir))
+	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, tmsk, qt, ordDir))
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
