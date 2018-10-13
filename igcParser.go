@@ -42,24 +42,24 @@ type Parser struct {
 }
 
 // Parse - main routine for parsing a IGC-track. Returns a Record.
-func (parser Parser) Parse() (rec Record) {
+func (parser Parser) Parse() (rec Record, lines []string) {
 	f, err := parser.openFile()
 	if err != nil {
 		return
 	}
 
-	l, _ := parser.fileToLines(f)
+	lines, _ = parser.fileToLines(f)
 
 	defer f.Close()
 
-	if len(l) == 0 {
+	if len(lines) == 0 {
 		logrus.Info("No lines in file")
 		return
 	}
 
-	h := parser.getHRecords(l)
+	h := parser.getHRecords(lines)
 
-	rec.Manufacturer = parseA(l[0])
+	rec.Manufacturer = parseA(lines[0])
 	rec.Header = parser.parseH(h)
 
 	return

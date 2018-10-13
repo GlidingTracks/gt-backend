@@ -1,22 +1,12 @@
 package rest
 
 import (
-	"context"
-	"firebase.google.com/go"
-	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
-	"github.com/Sirupsen/logrus"
-	"google.golang.org/api/option"
 	"testing"
 )
 
 func TestGetTracks(t *testing.T) {
-	opt := option.WithCredentialsFile("../" + constant.GoogleServiceCredName)
-
-	app, err := firebase.NewApp(context.Background(), nil, opt)
-	if err != nil {
-		logrus.Fatalf("error initializing app: %v\n", err)
-	}
+	app := InitializeFirebaseTest()
 
 	testUID := "iP1dgAHJ2JNce4hGr9H0RugkCHP2"
 	privateQ := models.NewFirebaseQuery(testUID, "1", "Private", "Asc")

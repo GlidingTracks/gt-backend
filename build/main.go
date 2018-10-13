@@ -31,10 +31,10 @@ func main() {
 		GetUserPage:    "/getUser",
 	}
 
-	fileUploadRoutes := &rest.FileUploadHandler{
-		Ctx:            *ctx,
-		UploadFilePage: "/upload",
-	}
+	//fileUploadRoutes := &rest.FileUploadHandler{
+	//	Ctx:            *ctx,
+	//	UploadFilePage: "/upload",
+	//}
 
 	dbRoutes := &rest.DbHandler{
 		Ctx:         *ctx,
@@ -45,7 +45,7 @@ func main() {
 	}
 
 	userRoutes.Bind(r)
-	fileUploadRoutes.Bind(r)
+	// fileUploadRoutes.Bind(r)
 	dbRoutes.Bind(r)
 
 	r.HandleFunc("/", startPage)
@@ -61,9 +61,12 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 
 // initializeFirebase gets a App object from Firebase, based on the service account credentials.
 func initializeFirebase() (app *firebase.App) {
+	config := &firebase.Config{
+		StorageBucket: "gt-backend-8b9c2.appspot.com",
+	}
 	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
 
-	app, err := firebase.NewApp(context.Background(), nil, opt)
+	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		logrus.Fatalf("error initializing app: %v\n", err)
 	}

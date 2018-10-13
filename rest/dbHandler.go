@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"context"
 	"encoding/json"
 	"firebase.google.com/go"
 	"github.com/GlidingTracks/gt-backend"
@@ -33,22 +32,12 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
 // and inserted into the DB.
 func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.Request) {
-	c, n, err := ProcessUploadRequest(r)
+	c, _, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
 
 		http.Error(w, err.Error(), c)
 		return
-	}
-
-	isPrivate := r.FormValue("private")
-	bp := gtbackend.GetBoolFromString(isPrivate)
-
-	err = insertTrackRecord(dbHandler.Ctx.App, n, bp)
-	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
-
-		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	w.WriteHeader(c)
@@ -91,43 +80,6 @@ func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) 
 
 func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Request) {
 
-}
-
-// insertTrackRecord saves a FilePayload struct to the DB.
-func insertTrackRecord(app *firebase.App, record models.FilePayload, isPrivate bool) (err error) {
-	ctx := context.Background()
-
-	client, err := app.Firestore(ctx)
-	if err != nil {
-		return
-	}
-
-	cr, _, err := client.Collection(constant.CollectionTracks).Add(ctx, record)
-	if err != nil {
-		return
-	}
-
-	parser := gtbackend.Parser{
-		Path: record.Path,
-	}
-
-	pIGC := parser.Parse()
-
-	md := &models.IgcMetadata{
-		Privacy: isPrivate,
-		Time:    gtbackend.GetUnixTime(),
-		UID:     record.UID,
-		Record:  pIGC,
-		TrackID: cr.ID,
-	}
-
-	// TODO, maybe validate md somehow before pushing it to db
-	_, _, err = client.Collection(constant.IgcMetadata).Add(ctx, md)
-	if err != nil {
-		return
-	}
-
-	return
 }
 
 func getTrack(app *firebase.App, trackID string) (err error) {
