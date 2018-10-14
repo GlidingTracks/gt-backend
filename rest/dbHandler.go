@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	"firebase.google.com/go"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
@@ -25,8 +24,8 @@ type DbHandler struct {
 func (dbHandler DbHandler) Bind(r *mux.Router) {
 	r.HandleFunc(dbHandler.InsertTrack, dbHandler.insertTrackRecordPage).Methods(constant.Post)
 	r.HandleFunc(dbHandler.GetTracks, dbHandler.getTracksPage).Methods(constant.Get)
-	r.HandleFunc(dbHandler.GetTrack, dbHandler.getTrackPage).Queries("trID", "{trID}")
-	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Queries("trID", "{trID}")
+	r.HandleFunc(dbHandler.GetTrack, dbHandler.getTrackPage).Methods(constant.Get)
+	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Methods(constant.Delete)
 }
 
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
@@ -57,6 +56,7 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Convert to JSON
@@ -65,6 +65,7 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Send response
@@ -74,18 +75,40 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 	return
 }
 
+// getTrackPage Gets the track from the Firebase Storage based on TrackID
 func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) {
+	trackID := r.Header.Get("trackID")
 
-}
+	// Process request
+	d, err := GetTrack(dbHandler.Ctx.App, trackID)
+	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "getTrackPage", err)
 
-func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-}
-
-func getTrack(app *firebase.App, trackID string) (err error) {
+	// Send response
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(200)
+	w.Write(d)
 	return
 }
 
-func deleteTrack(app *firebase.App, trackID string) (err error) {
+// deleteTrackPage Deletes track from Storage and Firestore Database based on TrackID
+func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Request) {
+	trackID := r.Header.Get("trackID")
+
+	// Process request
+	c, err := DeleteTrack(dbHandler.Ctx.App, trackID)
+	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "deleteTrackPage", err)
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Send response
+	w.WriteHeader(c)
 	return
 }

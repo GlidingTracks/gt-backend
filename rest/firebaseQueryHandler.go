@@ -8,6 +8,8 @@ import (
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"google.golang.org/api/iterator"
+	"io/ioutil"
+	"net/http"
 )
 
 // GetTracks gets a list of IgcMetadata from Firebase based on query
@@ -36,6 +38,73 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 	}
 
 	return data, err
+}
+
+// GetTrack gets a track file from the Firebase Storage based on TrackID in metadata
+func GetTrack(app *firebase.App, trackID string) (data []byte, err error) {
+	client, err := app.Storage(context.Background())
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "GetTrack", err)
+		return
+	}
+
+	bucket, err := client.DefaultBucket()
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "GetTrack", err)
+		return
+	}
+
+	// Read the entire file to data
+	rc, err := bucket.Object(trackID).NewReader(context.Background())
+	data, err = ioutil.ReadAll(rc)
+	defer rc.Close()
+
+	return
+}
+
+// DeleteTrack deletes the track from storage and firestore
+func DeleteTrack(app *firebase.App, trackID string) (httpCode int, err error) {
+	ctx := context.Background()
+
+	// Delete file from storage
+	storageClient, err := app.Storage(ctx)
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - StorageClient", err)
+		httpCode = http.StatusBadRequest
+		return
+	}
+
+	bucket, err := storageClient.DefaultBucket()
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - Bucket", err)
+		httpCode = http.StatusBadRequest
+		return
+	}
+
+	err = bucket.Object(trackID).Delete(ctx)
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - FileDelete", err)
+		httpCode = http.StatusBadRequest
+		return
+	}
+
+	// Delete file from firestore
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - FirestoreClient", err)
+		httpCode = http.StatusBadRequest
+		return
+	}
+
+	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Delete(ctx)
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - MetadataDelete", err)
+		httpCode = http.StatusBadRequest
+		return
+	}
+
+	httpCode = http.StatusOK
+	return
 }
 
 /** processIterGetTracks

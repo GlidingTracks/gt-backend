@@ -39,3 +39,12 @@ func TestGetTracks(t *testing.T) {
 		}
 	}
 }
+
+func TestGetTrack(t *testing.T) {
+	app := InitializeFirebaseTest()
+
+	data, err := GetTrack(app, "HAGOdywD9rQayoOOIHyd")
+	if err != nil && len(data) < 1 {
+		t.Error("Did not receive any data, should receive data", err)
+	}
+}

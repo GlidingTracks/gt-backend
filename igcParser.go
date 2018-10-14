@@ -38,19 +38,12 @@ type H struct {
 // Parser holds a file, mostly done to keep as much as possible private,
 // while also support testing.
 type Parser struct {
-	Path string
+	Parsed string
 }
 
 // Parse - main routine for parsing a IGC-track. Returns a Record.
-func (parser Parser) Parse() (rec Record, lines []string) {
-	f, err := parser.openFile()
-	if err != nil {
-		return
-	}
-
-	lines, _ = parser.fileToLines(f)
-
-	defer f.Close()
+func (parser Parser) Parse() (rec Record) {
+	lines := strings.Split(parser.Parsed, "\n")
 
 	if len(lines) == 0 {
 		logrus.Info("No lines in file")
@@ -145,8 +138,3 @@ func (parser Parser) getHRecords(records []string) (h []string) {
 	return
 }
 
-// openFile will return an open file based on the parser's Path var.
-func (parser Parser) openFile() (file *os.File, err error) {
-	file, err = os.Open(parser.Path)
-	return
-}

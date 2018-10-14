@@ -16,3 +16,6 @@ const PageSize = 20
 
 // FirebaseQueryOrder - What to order the Firestore Query with (time)
 const FirebaseQueryOrder = "Time"
+
+// MaxIgcFileSize - Max size of an IGC file (MB - KB - B)
+const MaxIgcFileSize = 15 * 1024 * 1024
