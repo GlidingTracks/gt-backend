@@ -16,3 +16,6 @@ const Post = "POST"
 
 // Get - GET http method
 const Get = "GET"
+
+// Delete - DELETE http method
+const Delete = "DELETE"

@@ -1,11 +1,13 @@
 package rest
 
 import (
+	"cloud.google.com/go/firestore"
+	"context"
 	"errors"
+	"firebase.google.com/go"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
-	"github.com/gorilla/mux"
 	"mime/multipart"
 	"net/http"
 	"strings"
@@ -14,30 +16,9 @@ import (
 // fileNameFUH - Used in debugging. TODO remove before prod
 const fileNameFUH = "fileUploadHandler.go"
 
-// FileUploadHandler holds the context and routes for this handler.
-type FileUploadHandler struct {
-	Ctx            Context
-	UploadFilePage string
-}
-
-// Bind sets up the routes to the mux router.
-func (fuh FileUploadHandler) Bind(r *mux.Router) {
-	r.HandleFunc(fuh.UploadFilePage, uploadFilePage).Methods("POST")
-}
-
-// uploadFilePage - Upload and save a file to the filesystem
-func uploadFilePage(w http.ResponseWriter, r *http.Request) {
-	httpCode, _, err := ProcessUploadRequest(r)
-	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "uploadFilePage", err)
-
-		http.Error(w, err.Error(), httpCode)
-	}
-}
-
 // ProcessUploadRequest - Actual processing of the file upload
 // Inspiration: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/04.5.html
-func ProcessUploadRequest(r *http.Request) (httpCode int, payload models.FilePayload, err error) {
+func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md models.IgcMetadata, err error) {
 	uid := getUID(r)
 	if uid == "" {
 		gtbackend.DebugLog(fileNameFUH, "uploadFilePage", errors.New(constant.ErrorNoUIDProvided))
@@ -49,6 +30,7 @@ func ProcessUploadRequest(r *http.Request) (httpCode int, payload models.FilePay
 
 	r.ParseMultipartForm(32 << 20)
 
+	// Get file source
 	src, handler, err := r.FormFile("file")
 	if err != nil {
 		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
@@ -56,42 +38,52 @@ func ProcessUploadRequest(r *http.Request) (httpCode int, payload models.FilePay
 		httpCode = http.StatusBadRequest
 		return
 	}
-
 	defer src.Close()
 
-	err = checkFileContentType(src, handler)
+	// Check file and parse it to workable string
+	parsed, err := processFileContent(src, handler)
 	if err != nil {
 		httpCode = http.StatusUnsupportedMediaType
 		return
 	}
 
-	f, p, err := gtbackend.SaveFileToLocalStorage(uid, handler.Filename, src)
+	// Deduce file privacy
+	isPrivate := r.FormValue("private")
+	bp := gtbackend.GetBoolFromString(isPrivate)
+
+	// Upload metadata to Cloud Firestore Database
+	md, err = uploadMetadataToFirestore(app, uid, parsed, bp)
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "ProcessUploadRequest", err)
+		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
 
 		httpCode = http.StatusBadRequest
-		return
 	}
 
-	defer f.Close()
+	// Upload file to Firebase Storage
+	err = uploadFileToFirebase(app, md, parsed)
+	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
+
+		httpCode = http.StatusBadRequest
+	}
 
 	httpCode = http.StatusOK
-
-	payload = models.FilePayload{
-		UID:  uid,
-		Path: p,
-	}
-
 	return
 }
 
 // checkFileContentType - Check whether or not a file is of type IGC
 // https://golang.org/pkg/net/http/#DetectContentType
-func checkFileContentType(file multipart.File, handler *multipart.FileHeader) (err error) {
-	buff := make([]byte, 512)
+func processFileContent(file multipart.File, handler *multipart.FileHeader) (parsed string, err error) {
+	if handler.Size > constant.MaxIgcFileSize {
+		gtbackend.DebugLog(fileNameFUH, "processFileContent - MaxIgcFileSize FAIL", err)
+
+		return
+	}
+
+	buff := make([]byte, handler.Size)
 
 	if _, err = file.Read(buff); err != nil {
-		gtbackend.DebugLog(fileNameFUH, "checkFileContentType", err)
+		gtbackend.DebugLog(fileNameFUH, "processFileContent - buffer error", err)
 
 		return
 	}
@@ -101,10 +93,17 @@ func checkFileContentType(file multipart.File, handler *multipart.FileHeader) (e
 
 	content := http.DetectContentType(buff)
 
+	// Check file name for extension and contents to be the TextPlain constant
 	if !strings.Contains(handler.Filename, "."+constant.IGCExtension) || !strings.Contains(content, constant.TextPlain) {
 		err = errors.New(constant.ErrorInvalidContentType)
+		gtbackend.DebugLog(fileNameFUH, "processFileContent - content error", err)
 		return
 	}
+
+	// Parse the file as we already buffer it here
+	var builder strings.Builder
+	builder.Write(buff)
+	parsed = builder.String()
 
 	return
 }
@@ -112,5 +111,84 @@ func checkFileContentType(file multipart.File, handler *multipart.FileHeader) (e
 // getUID retrieves the "uid" field from a multipart/form-data request.
 func getUID(r *http.Request) (uid string) {
 	uid = r.FormValue("uid")
+	return
+}
+
+// uploadMetadataToFirestore saves a FilePayload struct to the DB.
+func uploadMetadataToFirestore(
+	app *firebase.App,
+	uid string,
+	parsed string,
+	isPrivate bool) (
+	md models.IgcMetadata,
+	err error) {
+	ctx := context.Background()
+
+	client, err := app.Firestore(ctx)
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "uploadMetadataToFirestore", err)
+		return
+	}
+
+	parser := gtbackend.Parser{
+		Parsed: parsed,
+	}
+
+	pIGC := parser.Parse()
+
+	// Prepare md with data, TrackID as placeholder for now
+	md = models.IgcMetadata{
+		Privacy: isPrivate,
+		Time:    gtbackend.GetUnixTime(),
+		UID:     uid,
+		Record:  pIGC,
+		TrackID: "placeholder",
+	}
+
+	// Upload metadata to Firestore, get document record to update TrackID later
+	cr, _, err := client.Collection(constant.IgcMetadata).Add(ctx, md)
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "uploadMetadataToFirestore - Add error", err)
+		return
+	}
+
+	// Set TrackID to be the document ID of the metadata
+	_, err = client.Collection(constant.IgcMetadata).Doc(cr.ID).Set(ctx, map[string]interface{}{
+		"TrackID": cr.ID,
+	}, firestore.MergeAll)
+	md.TrackID = cr.ID
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "uploadMetadataToFirestore - Set TrackID error", err)
+		return
+	}
+
+	return
+}
+
+// uploadFileToFirebase Uploads the file to Firebase Storage
+func uploadFileToFirebase(app *firebase.App, md models.IgcMetadata, parsed string) (err error) {
+	client, err := app.Storage(context.Background())
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "uploadFileToFirebase", err)
+		return
+	}
+
+	bucket, err := client.DefaultBucket()
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "uploadFileToFirebase", err)
+		return
+	}
+
+	//Create new object in storage with TrackID ID, write parsed string to the file
+	wc := bucket.Object(md.TrackID).NewWriter(context.Background())
+	defer wc.Close()
+
+	wc.ContentType = "text/plain"
+	_, err = wc.Write([]byte(parsed))
+	if err != nil {
+		gtbackend.DebugLog(fileNameFUH, "uploadFileToFirebase - Write error", err)
+		return
+	}
+
 	return
 }

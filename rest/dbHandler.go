@@ -1,9 +1,7 @@
 package rest
 
 import (
-	"context"
 	"encoding/json"
-	"firebase.google.com/go"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
@@ -26,29 +24,19 @@ type DbHandler struct {
 func (dbHandler DbHandler) Bind(r *mux.Router) {
 	r.HandleFunc(dbHandler.InsertTrack, dbHandler.insertTrackRecordPage).Methods(constant.Post)
 	r.HandleFunc(dbHandler.GetTracks, dbHandler.getTracksPage).Methods(constant.Get)
-	r.HandleFunc(dbHandler.GetTrack, dbHandler.getTrackPage).Queries("trID", "{trID}")
-	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Queries("trID", "{trID}")
+	r.HandleFunc(dbHandler.GetTrack, dbHandler.getTrackPage).Methods(constant.Get)
+	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Methods(constant.Delete)
 }
 
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
 // and inserted into the DB.
 func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.Request) {
-	c, n, err := ProcessUploadRequest(r)
+	c, _, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
 	if err != nil {
 		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
 
 		http.Error(w, err.Error(), c)
 		return
-	}
-
-	isPrivate := r.FormValue("private")
-	bp := gtbackend.GetBoolFromString(isPrivate)
-
-	err = insertTrackRecord(dbHandler.Ctx.App, n, bp)
-	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
-
-		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	w.WriteHeader(c)
@@ -68,6 +56,7 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Convert to JSON
@@ -76,6 +65,7 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Send response
@@ -85,55 +75,40 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 	return
 }
 
+// getTrackPage Gets the track from the Firebase Storage based on TrackID
 func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) {
+	trackID := r.Header.Get("trackID")
 
+	// Process request
+	d, err := GetTrack(dbHandler.Ctx.App, trackID)
+	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "getTrackPage", err)
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(200)
+	w.Write(d)
+	return
 }
 
+// deleteTrackPage Deletes track from Storage and Firestore Database based on TrackID
 func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Request) {
+	trackID := r.Header.Get("trackID")
 
-}
-
-// insertTrackRecord saves a FilePayload struct to the DB.
-func insertTrackRecord(app *firebase.App, record models.FilePayload, isPrivate bool) (err error) {
-	ctx := context.Background()
-
-	client, err := app.Firestore(ctx)
+	// Process request
+	c, err := DeleteTrack(dbHandler.Ctx.App, trackID)
 	if err != nil {
+		gtbackend.DebugLog(fileNameDB, "deleteTrackPage", err)
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	cr, _, err := client.Collection(constant.CollectionTracks).Add(ctx, record)
-	if err != nil {
-		return
-	}
-
-	parser := gtbackend.Parser{
-		Path: record.Path,
-	}
-
-	pIGC := parser.Parse()
-
-	md := &models.IgcMetadata{
-		Privacy: isPrivate,
-		Time:    gtbackend.GetUnixTime(),
-		UID:     record.UID,
-		Record:  pIGC,
-		TrackID: cr.ID,
-	}
-
-	// TODO, maybe validate md somehow before pushing it to db
-	_, _, err = client.Collection(constant.IgcMetadata).Add(ctx, md)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-func getTrack(app *firebase.App, trackID string) (err error) {
-	return
-}
-
-func deleteTrack(app *firebase.App, trackID string) (err error) {
+	// Send response
+	w.WriteHeader(c)
 	return
 }
