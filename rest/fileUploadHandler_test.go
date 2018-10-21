@@ -25,9 +25,11 @@ func TestProcessUploadRequestWrongContentType(t *testing.T) {
 	}
 
 	code, _, err := ProcessUploadRequest(app, req)
+
 	if err == nil && code != 415 {
 		t.Error("Wrong file content type got through", err)
 	}
+
 }
 
 // Tests ProcessUploadRequest, and also DeleteTrack to clean up and test that too
@@ -52,6 +54,7 @@ func TestProcessUpload(t *testing.T) {
 	if err != nil && code != 200 {
 		t.Error("Could not delete data, should delete data")
 	}
+
 }
 
 // Shamefully nicked stackoverflow answer: https://stackoverflow.com/a/20397167/7036624

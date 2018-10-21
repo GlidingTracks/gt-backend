@@ -21,13 +21,13 @@ const fileNameFUH = "fileUploadHandler.go"
 func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md models.IgcMetadata, err error) {
 	uid := getUID(r)
 	if uid == "" {
+		err = errors.New(constant.ErrorNoUIDProvided)
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameFUH,
 			Method: "uploadFilePage",
-			Err:    errors.New(constant.ErrorNoUIDProvided),
+			Err:    err,
 		})
 
-		err = errors.New(constant.ErrorNoUIDProvided)
 		httpCode = http.StatusBadRequest
 		return
 	}
@@ -69,6 +69,8 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 		})
 
 		httpCode = http.StatusBadRequest
+
+		return
 	}
 
 	// Upload file to Firebase Storage
@@ -81,6 +83,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 		})
 
 		httpCode = http.StatusBadRequest
+		return
 	}
 
 	httpCode = http.StatusOK
@@ -121,10 +124,12 @@ func processFileContent(file multipart.File, handler *multipart.FileHeader) (par
 
 	// Check file name for extension and contents to be the TextPlain constant
 	if !strings.Contains(handler.Filename, "."+constant.IGCExtension) || !strings.Contains(content, constant.TextPlain) {
+		err = errors.New(constant.ErrorInvalidContentType)
+
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameFUH,
 			Method: "processFileContent",
-			Err:    errors.New(constant.ErrorInvalidContentType),
+			Err:    err,
 			Msg:    "Content error",
 		})
 

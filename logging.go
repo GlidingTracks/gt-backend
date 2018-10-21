@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -32,7 +33,7 @@ const LOGS = "logs"
 // LogIncomingRequests - Logs request traffic into our app
 func LogIncomingRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := LOGS + "/" + CONNECTOR
+		path := filepath.Join(LOGS, CONNECTOR)
 		writer, err := GetLogWriter(path)
 		if err != nil {
 			logrus.Error(err.Error())
@@ -47,7 +48,8 @@ func LogIncomingRequests(next http.Handler) http.Handler {
 
 // DebugLog - Log an error internally, will contain implementation specific information
 func DebugLog(entry InternalLog) {
-	path := LOGS + "/" + APPLICATION
+	abs, _ := filepath.Abs("../" + LOGS)
+	path := filepath.Join(abs, APPLICATION)
 	writer, err := GetLogWriter(path)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -107,7 +109,7 @@ func logInternal(entry InternalLog, writers []io.Writer, msg string) {
 	logEntry := logger.WithFields(logrus.Fields{
 		"origin": entry.Origin,
 		"method": entry.Method,
-		"err":    entry.Err.Error(),
+		"err":    entry.Err,
 		"msg":    entry.Msg,
 	})
 
