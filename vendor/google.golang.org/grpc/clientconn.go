@@ -306,9 +306,7 @@ func DialContext(ctx context.Context, target string, opts ...DialOption) (conn *
 				break
 			} else if cc.dopts.copts.FailOnNonTempDialError && s == connectivity.TransientFailure {
 				if err = cc.blockingpicker.connectionError(); err != nil {
-					terr, ok := err.(interface {
-						Temporary() bool
-					})
+					terr, ok := err.(interface{ Temporary() bool })
 					if ok && !terr.Temporary() {
 						return nil, err
 					}

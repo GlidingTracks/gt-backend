@@ -1,5 +1,11 @@
 {
 	"comment": "",
+	"heroku": {
+		"goVersion": "go1.11",
+		"install": [
+			"./..."
+		]
+	},
 	"ignore": "test",
 	"package": [
 		{
@@ -393,7 +399,7 @@
 			"revisionTime": "2018-09-08T17:02:15Z"
 		},
 		{
-			"checksumSHA1": "othnvXmmdxkNRyNDxRg5SKwLP8k=",
+			"checksumSHA1": "XJr6+rzzxASewSbC/SCStyGlmuw=",
 			"path": "golang.org/x/text/unicode/norm",
 			"revision": "905a57155faa8230500121607930ebb9dd8e139c",
 			"revisionTime": "2018-09-08T17:02:15Z"
@@ -669,9 +675,9 @@
 			"revisionTime": "2018-09-25T21:15:54Z"
 		}
 	],
-	"rootPath": "../../bin/build",
-	"heroku": {
-		"install": ["./..."],
-		"goVersion": "go1.11"
-	}
+	"rootPath": "github.com/GlidingTracks/gt-backend",
+    "heroku" : {
+        "goVersion": "go1.11",
+        "install": ["./..."]
+    }
 }
