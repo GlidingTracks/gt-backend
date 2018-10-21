@@ -8,6 +8,9 @@ const GoogleServiceCredName = "gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac6
 // GoogleCredEnvVar - name of environment variable for hosting cred file in cloud
 const GoogleCredEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
 
+// FirebaseStorageBucket url
+const FirebaseStorageBucket = "gt-backend-8b9c2.appspot.com"
+
 // CollectionTracks - Name of collection containing tracks in firestore.
 const CollectionTracks = "tracks"
 
@@ -16,3 +19,9 @@ const IgcMetadata = "igc-metadata"
 
 // PageSize - Size of a page in a Firestore Query
 const PageSize = 20
+
+// FirebaseQueryOrder - What to order the Firestore Query with (time)
+const FirebaseQueryOrder = "Time"
+
+// MaxIgcFileSize - Max size of an IGC file (MB - KB - B)
+const MaxIgcFileSize = 15 * 1024 * 1024

@@ -37,11 +37,6 @@ func main() {
 		GetUserPage:    "/getUser",
 	}
 
-	fileUploadRoutes := &rest.FileUploadHandler{
-		Ctx:            *ctx,
-		UploadFilePage: "/upload",
-	}
-
 	dbRoutes := &rest.DbHandler{
 		Ctx:         *ctx,
 		InsertTrack: "/insertTrack",
@@ -51,7 +46,6 @@ func main() {
 	}
 
 	userRoutes.Bind(r)
-	fileUploadRoutes.Bind(r)
 	dbRoutes.Bind(r)
 
 	r.HandleFunc("/", startPage)
@@ -79,12 +73,14 @@ func initializeFirebase() (app *firebase.App, err error) {
 		}
 	}
 
+	config := &firebase.Config{
+		StorageBucket: constant.FirebaseStorageBucket,
+	}
 	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
 
-	app, err = firebase.NewApp(context.Background(), nil, opt)
+	app, err = firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		logrus.Fatalf("error initializing app: %v\n", err)
-		return
 	}
 
 	return
@@ -115,6 +111,8 @@ func tryCreateFirebaseCredsFromEnv() (success bool) {
 	if err != nil {
 		return
 	}
+
+	defer f.Close()
 
 	_, err = f.WriteString(val)
 	if err != nil {

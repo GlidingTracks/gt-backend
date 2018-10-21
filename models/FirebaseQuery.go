@@ -3,6 +3,7 @@ package models
 import (
 	"cloud.google.com/go/firestore"
 	"github.com/GlidingTracks/gt-backend"
+	"golang.org/x/tools/container/intsets"
 	"strconv"
 )
 
@@ -10,32 +11,39 @@ const filenameFQ = "FirebaseQuery.go"
 
 // FirebaseQuery - struct denoting a Firebase query to receive data.
 // UID string User ID as string
-// Pg int Page number to get
+// TmSk int Time to skip the query to (pagination)
 // Qt string Query type, if multiple flavors of queries exist (ex. getTracks personal and public)
-// Ord string Which data type to order by
 // OrdDir firestore.Direction Which direction to order by. Default: Asc.
 type FirebaseQuery struct {
 	UID    string
-	Pg     int
+	TmSk     int
 	Qt     string
-	Ord    string
 	OrdDir firestore.Direction
 }
 
 // NewFirebaseQuery - Initializes the query with values from strings (from header),
-// sets Pg = 1 and OrdDir = Asc as default.
-func NewFirebaseQuery(u string, p string, q string, o string, od string) FirebaseQuery {
-	pint, err := strconv.Atoi(p)
-	if err != nil || pint < 1 {
-		pint = 1
-
-		gtbackend.DebugLog(filenameFQ, "getTracksPage", err)
-	}
-
+// sets TmSk = 1 and OrdDir = Asc as default.
+func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
 	odfd := firestore.Asc
 	if od == "Desc" {
 		odfd = firestore.Desc
 	}
 
-	return FirebaseQuery{u, pint, q, o, odfd}
+
+	skipint, err := strconv.Atoi(t)
+	if err != nil || skipint < 1 {
+		// Ensure that failed default timeskip will show the first page
+		// Mismatch will lead to no results as all are skipped by Tmsk
+		// Desc starts with largest time, Asc with smallest time
+		if odfd == firestore.Desc {
+			skipint = intsets.MaxInt
+		} else {
+			skipint = intsets.MinInt
+		}
+
+		gtbackend.DebugLog(filenameFQ, "getTracksPage", err)
+	}
+
+
+	return FirebaseQuery{u, skipint, q, odfd}
 }

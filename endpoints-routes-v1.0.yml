@@ -111,19 +111,15 @@
       type: string
       description: Requesting user id
       required: true
-    - name: page
+    - name: timeSkip
       type: string
-      description: Requested page
+      description: Skip to after this timestamp
       required: false (default = 1)
     - name: queryType
       type: string
       description: Type of query to be made
       available: Private, Public
       required: false (default = Public)
-    - name: order (DISABLED)
-      type: string
-      description: What to order the search on
-      required: false (default = Time)
     - name: orderDirection
       type: string
       description: Direction of the order
@@ -165,4 +161,36 @@
       content-type: application/json
     - code: 415
       reason: File not off correct mime. We only support .IGC
+      content-type: application/json
+
+/getTrack:
+  method: GET
+    summary: Get an IGC file from the server based on TrackID
+    params:
+    - name: trackID
+      type: string
+      description: Track ID to get
+      required: true
+    response:
+    - code: 200
+      description: File fetched successfully
+      content-type: text/plain
+    - code: 400
+      description: bad request, cannot handle the request
+      content-type: application/json
+
+/deleteTrack:
+  method: DELETE
+    summary: Deletes an IGC file from the server based on TrackID
+    params:
+    - name: trackID
+      type: string
+      description: Track ID to get
+      required: true
+    response:
+    - code: 200
+      description: File fetched successfully
+      content-type: text/plain
+    - code: 400
+      description: bad request, cannot handle the request
       content-type: application/json

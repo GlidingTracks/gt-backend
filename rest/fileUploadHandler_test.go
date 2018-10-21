@@ -13,6 +13,7 @@ import (
 )
 
 func TestProcessUploadRequestWrongContentType(t *testing.T) {
+	app := InitializeFirebaseTest()
 	values := map[string]io.Reader{
 		"uid":  strings.NewReader("123"),
 		"file": mustOpen("../testdata/text.txt"),
@@ -23,13 +24,15 @@ func TestProcessUploadRequestWrongContentType(t *testing.T) {
 		t.Error("Could not create multipart")
 	}
 
-	code, _, err := ProcessUploadRequest(req)
+	code, _, err := ProcessUploadRequest(app, req)
 	if err == nil && code != 415 {
 		t.Error("Wrong file content type got through", err)
 	}
 }
 
+// Tests ProcessUploadRequest, and also DeleteTrack to clean up and test that too
 func TestProcessUpload(t *testing.T) {
+	app := InitializeFirebaseTest()
 	values := map[string]io.Reader{
 		"uid":  strings.NewReader("123"),
 		"file": mustOpen("../testdata/testIgc.igc"),
@@ -40,16 +43,14 @@ func TestProcessUpload(t *testing.T) {
 		t.Error("Could not create multipart")
 	}
 
-	code, _, err := ProcessUploadRequest(req)
+	code, md, err := ProcessUploadRequest(app, req)
 	if err != nil && code != 200 {
 		t.Error("Could not save file, should pass", err)
 	}
-}
 
-func TestFileUploadHandler_Implementations(t *testing.T) {
-	var handler interface{} = &FileUploadHandler{}
-	if _, implemented := handler.(MuxRouteBinder); !implemented {
-		t.Error("does not implement MuxRouteBinder")
+	code, err = DeleteTrack(app, md.TrackID)
+	if err != nil && code != 200 {
+		t.Error("Could not delete data, should delete data")
 	}
 }
 
