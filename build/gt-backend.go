@@ -101,7 +101,7 @@ func checkIfFirebaseCredentialsExist() (exist bool) {
 func tryCreateFirebaseCredsFromEnv() (success bool) {
 	success = false
 
-	val := os.Getenv(constant.GoogleServiceCredName)
+	val := os.Getenv(constant.GoogleCredEnvVar)
 	if val == "" {
 		return
 	}
@@ -111,7 +111,10 @@ func tryCreateFirebaseCredsFromEnv() (success bool) {
 		return
 	}
 
-	f.WriteString(val)
+	_, err = f.WriteString(val)
+	if err != nil {
+		return
+	}
 
 	success = true
 	return
