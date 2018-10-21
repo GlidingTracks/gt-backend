@@ -55,7 +55,7 @@ func main() {
 		logrus.Fatal("$PORT must be set")
 	}
 
-	logrus.Fatal(http.ListenAndServe(":" + port, r))
+	logrus.Fatal(http.ListenAndServe(":"+port, r))
 }
 
 // startPage redirects every non-existing path to url: localhost:8080/.

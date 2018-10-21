@@ -137,4 +137,3 @@ func (parser Parser) getHRecords(records []string) (h []string) {
 	}
 	return
 }
-
