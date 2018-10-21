@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"firebase.google.com/go"
-	"fmt"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/rest"
 	"github.com/Sirupsen/logrus"
@@ -21,8 +20,7 @@ func main() {
 
 	app, err := initializeFirebase()
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		logrus.Fatal(err.Error())
 	}
 
 	ctx := &rest.Context{
@@ -58,7 +56,12 @@ func main() {
 
 	r.HandleFunc("/", startPage)
 
-	logrus.Fatal(http.ListenAndServe(":8080", r))
+	port := os.Getenv("PORT")
+	if port == "" {
+		logrus.Fatal("$PORT must be set")
+	}
+
+	logrus.Fatal(http.ListenAndServe(":" + port, r))
 }
 
 // startPage redirects every non-existing path to url: localhost:8080/.
