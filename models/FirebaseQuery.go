@@ -16,7 +16,7 @@ const filenameFQ = "FirebaseQuery.go"
 // OrdDir firestore.Direction Which direction to order by. Default: Asc.
 type FirebaseQuery struct {
 	UID    string
-	TmSk     int
+	TmSk   int
 	Qt     string
 	OrdDir firestore.Direction
 }
@@ -28,7 +28,6 @@ func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
 	if od == "Desc" {
 		odfd = firestore.Desc
 	}
-
 
 	skipint, err := strconv.Atoi(t)
 	if err != nil || skipint < 1 {
@@ -43,7 +42,6 @@ func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
 
 		gtbackend.DebugLog(filenameFQ, "getTracksPage", err)
 	}
-
 
 	return FirebaseQuery{u, skipint, q, odfd}
 }

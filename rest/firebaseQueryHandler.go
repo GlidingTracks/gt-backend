@@ -65,7 +65,7 @@ func GetTrack(app *firebase.App, trackID string) (data []byte, err error) {
 // DeleteTrack deletes the track from storage and firestore
 func DeleteTrack(app *firebase.App, trackID string) (httpCode int, err error) {
 	ctx := context.Background()
-	httpCode = http.StatusBadRequest	// Return before OK means failure
+	httpCode = http.StatusBadRequest // Return before OK means failure
 
 	// Delete file from storage
 	storageClient, err := app.Storage(ctx)

@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"net/http"
+	"os"
 )
 
 // main is the first entry-point in application.
@@ -17,8 +18,13 @@ func main() {
 	// TODO set correct level in prod
 	logrus.SetLevel(logrus.DebugLevel)
 
+	app, err := initializeFirebase()
+	if err != nil {
+		logrus.Fatal(err.Error())
+	}
+
 	ctx := &rest.Context{
-		App: initializeFirebase(),
+		App: app,
 	}
 
 	r := mux.NewRouter()
@@ -44,7 +50,12 @@ func main() {
 
 	r.HandleFunc("/", startPage)
 
-	logrus.Fatal(http.ListenAndServe(":8080", r))
+	port := os.Getenv("PORT")
+	if port == "" {
+		logrus.Fatal("$PORT must be set")
+	}
+
+	logrus.Fatal(http.ListenAndServe(":"+port, r))
 }
 
 // startPage redirects every non-existing path to url: localhost:8080/.
@@ -54,16 +65,60 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // initializeFirebase gets a App object from Firebase, based on the service account credentials.
-func initializeFirebase() (app *firebase.App) {
+func initializeFirebase() (app *firebase.App, err error) {
+	if !checkIfFirebaseCredentialsExist() {
+		if !tryCreateFirebaseCredsFromEnv() {
+			err = errors.New("could not connect to DB")
+			return
+		}
+	}
+
 	config := &firebase.Config{
-		StorageBucket: "gt-backend-8b9c2.appspot.com",
+		StorageBucket: constant.FirebaseStorageBucket,
 	}
 	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
 
-	app, err := firebase.NewApp(context.Background(), config, opt)
+	app, err = firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		logrus.Fatalf("error initializing app: %v\n", err)
 	}
 
+	return
+}
+
+// checkIfFirebaseCredentialsExist will check for credential file, bool
+func checkIfFirebaseCredentialsExist() (exist bool) {
+	exist = false
+	_, err := os.Open(constant.GoogleServiceCredName)
+	if err != nil {
+		return
+	}
+
+	exist = true
+	return
+}
+
+// tryCreateFirebaseCredsFromEnv if cred content is loaded as a environment variable, create cred file from it
+func tryCreateFirebaseCredsFromEnv() (success bool) {
+	success = false
+
+	val := os.Getenv(constant.GoogleCredEnvVar)
+	if val == "" {
+		return
+	}
+
+	f, err := os.Create(constant.GoogleServiceCredName)
+	if err != nil {
+		return
+	}
+
+	defer f.Close()
+
+	_, err = f.WriteString(val)
+	if err != nil {
+		return
+	}
+
+	success = true
 	return
 }
