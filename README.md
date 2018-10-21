@@ -9,3 +9,11 @@ Develop: [![CircleCI](https://circleci.com/gh/GlidingTracks/gt-backend/tree/deve
 
 Backend for handling uploading, storing and processing IGC files, and users in the system. REST
 
+### Cloning
+
+* go get https://github.com/GlidingTracks/gt-backend
+
+
+Update govendor
+
+* govendor sync
