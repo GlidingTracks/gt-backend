@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"firebase.google.com/go"
+	"fmt"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/rest"
 	"github.com/Sirupsen/logrus"
@@ -10,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"net/http"
+	"os"
 )
 
 // main is the first entry-point in application.
@@ -17,8 +19,14 @@ func main() {
 	// TODO set correct level in prod
 	logrus.SetLevel(logrus.DebugLevel)
 
+	app, err := initializeFirebase()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
 	ctx := &rest.Context{
-		App: initializeFirebase(),
+		App: app,
 	}
 
 	r := mux.NewRouter()
@@ -60,13 +68,51 @@ func startPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // initializeFirebase gets a App object from Firebase, based on the service account credentials.
-func initializeFirebase() (app *firebase.App) {
-	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
-
-	app, err := firebase.NewApp(context.Background(), nil, opt)
-	if err != nil {
-		logrus.Fatalf("error initializing app: %v\n", err)
+func initializeFirebase() (app *firebase.App, err error) {
+	if !checkIfFirebaseCredentialsExist() {
+		if !tryCreateFirebaseCredsFromEnv() {
+			err = errors.New("could not connect to DB")
+			return
+		}
 	}
 
+	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
+
+	app, err = firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		logrus.Fatalf("error initializing app: %v\n", err)
+		return
+	}
+
+	return
+}
+
+func checkIfFirebaseCredentialsExist() (exist bool) {
+	exist = false
+	_, err := os.Open(constant.GoogleServiceCredName)
+	if err != nil {
+		return
+	}
+
+	exist = true
+	return
+}
+
+func tryCreateFirebaseCredsFromEnv() (success bool) {
+	success = false
+
+	val := os.Getenv(constant.GoogleServiceCredName)
+	if val == "" {
+		return
+	}
+
+	f, err := os.Create(constant.GoogleServiceCredName)
+	if err != nil {
+		return
+	}
+
+	f.WriteString(val)
+
+	success = true
 	return
 }

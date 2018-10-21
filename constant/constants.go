@@ -5,6 +5,9 @@ package constant
 // Google service account. Used to authenticate with firebase.
 const GoogleServiceCredName = "gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json"
 
+// GoogleCredEnvVar - name of environment variable for hosting cred file in cloud
+const GoogleCredEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
+
 // CollectionTracks - Name of collection containing tracks in firestore.
 const CollectionTracks = "tracks"
 
