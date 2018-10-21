@@ -90,6 +90,7 @@ func initializeFirebase() (app *firebase.App, err error) {
 	return
 }
 
+// checkIfFirebaseCredentialsExist will check for credential file, bool
 func checkIfFirebaseCredentialsExist() (exist bool) {
 	exist = false
 	_, err := os.Open(constant.GoogleServiceCredName)
@@ -101,6 +102,7 @@ func checkIfFirebaseCredentialsExist() (exist bool) {
 	return
 }
 
+// tryCreateFirebaseCredsFromEnv if cred content is loaded as a environment variable, create cred file from it
 func tryCreateFirebaseCredsFromEnv() (success bool) {
 	success = false
 
