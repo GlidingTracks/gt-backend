@@ -669,7 +669,7 @@
 			"revisionTime": "2018-09-25T21:15:54Z"
 		}
 	],
-	"rootPath": "../../bin/gt-backend",
+	"rootPath": "../../bin/build",
 	"heroku": {
 		"install": ["./..."],
 		"goVersion": "go1.11"
