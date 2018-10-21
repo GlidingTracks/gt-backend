@@ -13,7 +13,10 @@ Backend for handling uploading, storing and processing IGC files, and users in t
 
 * go get https://github.com/GlidingTracks/gt-backend
 
-
 Update govendor
 
 * govendor sync
+
+Pre running locally (linux)
+
+* export PORT=xxxx
