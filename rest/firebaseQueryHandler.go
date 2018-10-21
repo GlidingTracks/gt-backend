@@ -12,13 +12,21 @@ import (
 	"net/http"
 )
 
+// fileNameFQH filename
+const fileNameFQH = "firebaseQueryHandler.go"
+
 // GetTracks gets a list of IgcMetadata from Firebase based on query
 func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error) {
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
 	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "GetTracks", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "getTracks",
+			Err:    err,
+		})
+
 		return
 	}
 
@@ -44,13 +52,23 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 func GetTrack(app *firebase.App, trackID string) (data []byte, err error) {
 	client, err := app.Storage(context.Background())
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "GetTrack", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "GetTrack",
+			Err:    err,
+		})
+
 		return
 	}
 
 	bucket, err := client.DefaultBucket()
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "GetTrack", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "GetTrack",
+			Err:    err,
+		})
+
 		return
 	}
 
@@ -70,32 +88,62 @@ func DeleteTrack(app *firebase.App, trackID string) (httpCode int, err error) {
 	// Delete file from storage
 	storageClient, err := app.Storage(ctx)
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - StorageClient", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "DeleteTrack",
+			Err:    err,
+			Msg:    "StorageClient",
+		})
+
 		return
 	}
 
 	bucket, err := storageClient.DefaultBucket()
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - Bucket", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "DeleteTrack",
+			Err:    err,
+			Msg:    "Bucket",
+		})
+
 		return
 	}
 
 	err = bucket.Object(trackID).Delete(ctx)
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - FileDelete", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "DeleteTrack",
+			Err:    err,
+			Msg:    "FileDelete",
+		})
+
 		return
 	}
 
 	// Delete file from firestore
 	client, err := app.Firestore(ctx)
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - FirestoreClient", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "DeleteTrack",
+			Err:    err,
+			Msg:    "FirestoreClient",
+		})
+
 		return
 	}
 
 	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Delete(ctx)
 	if err != nil {
-		gtbackend.DebugLog(fileNameFUH, "DeleteTrack - MetadataDelete", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameFQH,
+			Method: "DeleteTrack",
+			Err:    err,
+			Msg:    "MetadataDelete",
+		})
+
 		return
 	}
 
@@ -118,7 +166,12 @@ func processIterGetTracks(iter *firestore.DocumentIterator, filterUID string) (d
 			break
 		}
 		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "processIterGetTracks", err)
+			gtbackend.DebugLog(gtbackend.InternalLog{
+				Origin: fileNameFQH,
+				Method: "processIterGetTracks",
+				Err:    err,
+			})
+
 			return data, err
 		}
 
@@ -126,7 +179,12 @@ func processIterGetTracks(iter *firestore.DocumentIterator, filterUID string) (d
 		var d models.IgcMetadata
 		err = doc.DataTo(&d)
 		if err != nil {
-			gtbackend.DebugLog(fileNameDB, "processIterGetTracks", err)
+			gtbackend.DebugLog(gtbackend.InternalLog{
+				Origin: fileNameFQH,
+				Method: "processIterGetTracks",
+				Err:    err,
+			})
+
 			return data, err
 		}
 

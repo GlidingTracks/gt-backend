@@ -33,7 +33,11 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.Request) {
 	c, _, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
 	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "insertTrackRecordPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "insertTrackRecordPage",
+			Err:    err,
+		})
 
 		http.Error(w, err.Error(), c)
 		return
@@ -53,7 +57,11 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 	// Process request
 	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, tmsk, qt, ordDir))
 	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "getTracksPage",
+			Err:    err,
+		})
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -62,7 +70,11 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 	// Convert to JSON
 	rd, err := json.Marshal(d)
 	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "getTracksPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "getTracksPage",
+			Err:    err,
+		})
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -82,7 +94,11 @@ func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) 
 	// Process request
 	d, err := GetTrack(dbHandler.Ctx.App, trackID)
 	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "getTrackPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "getTrack",
+			Err:    err,
+		})
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -102,7 +118,11 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 	// Process request
 	c, err := DeleteTrack(dbHandler.Ctx.App, trackID)
 	if err != nil {
-		gtbackend.DebugLog(fileNameDB, "deleteTrackPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "deleteTrackPage",
+			Err:    err,
+		})
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

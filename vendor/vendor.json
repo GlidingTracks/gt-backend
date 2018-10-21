@@ -201,6 +201,42 @@
 			"revisionTime": "2018-08-30T14:23:24Z"
 		},
 		{
+			"checksumSHA1": "r6ZMyP/HsdeToXIxvgP3ntL6Bds=",
+			"path": "github.com/konsorten/go-windows-terminal-sequences",
+			"revision": "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242",
+			"revisionTime": "2018-10-04T22:41:46Z"
+		},
+		{
+			"checksumSHA1": "cNqzM4mpAwMb/lBIcMRZx+y7Dl4=",
+			"path": "github.com/lestrrat-go/file-rotatelogs",
+			"revision": "4ce522c92b91beadfd4c77f75dcc06ffe97cf9c6",
+			"revisionTime": "2018-10-19T12:31:06Z"
+		},
+		{
+			"checksumSHA1": "kCiYjWVsI7JrUA9SogAebi2cp00=",
+			"path": "github.com/lestrrat-go/file-rotatelogs/internal/option",
+			"revision": "4ce522c92b91beadfd4c77f75dcc06ffe97cf9c6",
+			"revisionTime": "2018-10-19T12:31:06Z"
+		},
+		{
+			"checksumSHA1": "8GXoz5FPFg8Hj3LjfwhmhvhUXUk=",
+			"path": "github.com/lestrrat-go/strftime",
+			"revision": "8b31f9c59b0feb56c456ce49a7b3d2b2e93a6f18",
+			"revisionTime": "2018-08-21T11:37:35Z"
+		},
+		{
+			"checksumSHA1": "DTy0iJ2w5C+FDsN9EnzfhNmvS+o=",
+			"path": "github.com/pkg/errors",
+			"revision": "d58f94251046e7f70ac45aceea6cf6f61415ccca",
+			"revisionTime": "2018-10-20T22:29:33Z"
+		},
+		{
+			"checksumSHA1": "1dd8tjW3xNUE6wV1T42Tmw/JN/s=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "4fabf2fffcecfd47f802869b7b92d75e43c5a095",
+			"revisionTime": "2018-10-21T10:09:20Z"
+		},
+		{
 			"checksumSHA1": "spJQVqIq0XRHXzOsLk4edlXu1u0=",
 			"path": "go.opencensus.io",
 			"revision": "f21fe3feadc5461b952191052818685a410428d4",
@@ -679,11 +715,15 @@
 			"path": "google.golang.org/grpc/tap",
 			"revision": "7fea98ede78e82ab2fa625629c8b8147db8639e6",
 			"revisionTime": "2018-09-25T21:15:54Z"
+		},
+		{
+			"path": "https://github.com/rifflock/lfshook",
+			"revision": ""
 		}
 	],
 	"rootPath": "github.com/GlidingTracks/gt-backend",
-    "heroku" : {
-      "goVersion": "go1.11",
-      "install": ["./..."]
-    }
+	"heroku" : {
+		"goVersion": "go1.11",
+		"install": ["./..."]
+	}
 }

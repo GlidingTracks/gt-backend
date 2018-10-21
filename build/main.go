@@ -3,9 +3,9 @@ package main
 import (
 	"errors"
 	"firebase.google.com/go"
+	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/rest"
-	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
@@ -15,12 +15,11 @@ import (
 
 // main is the first entry-point in application.
 func main() {
-	// TODO set correct level in prod
-	logrus.SetLevel(logrus.DebugLevel)
-
 	app, err := initializeFirebase()
 	if err != nil {
-		logrus.Fatal(err.Error())
+		gtbackend.FatalLog(gtbackend.InternalLog{
+			Err: err,
+		})
 	}
 
 	ctx := &rest.Context{
@@ -28,6 +27,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+	r.Use(gtbackend.LogIncomingRequests)
 
 	userRoutes := &rest.UserHandler{
 		Ctx:            *ctx,
@@ -52,10 +52,14 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		logrus.Fatal("$PORT must be set")
+		gtbackend.FatalLog(gtbackend.InternalLog{
+			Msg: "$PORT must be set",
+		})
 	}
 
-	logrus.Fatal(http.ListenAndServe(":"+port, r))
+	gtbackend.FatalLog(gtbackend.InternalLog{
+		Err: http.ListenAndServe(":"+port, r),
+	})
 }
 
 // startPage redirects every non-existing path to url: localhost:8080/.
@@ -80,7 +84,10 @@ func initializeFirebase() (app *firebase.App, err error) {
 
 	app, err = firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
-		logrus.Fatalf("error initializing app: %v\n", err)
+		gtbackend.FatalLog(gtbackend.InternalLog{
+			Msg: "error initializing app",
+			Err: err,
+		})
 	}
 
 	return

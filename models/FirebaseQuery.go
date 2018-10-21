@@ -40,7 +40,11 @@ func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
 			skipint = intsets.MinInt
 		}
 
-		gtbackend.DebugLog(filenameFQ, "getTracksPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: filenameFQ,
+			Method: "getTracksPage",
+			Err:    err,
+		})
 	}
 
 	return FirebaseQuery{u, skipint, q, odfd}

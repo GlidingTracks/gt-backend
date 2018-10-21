@@ -2,11 +2,13 @@ package gtbackend
 
 import (
 	"bufio"
-	"github.com/Sirupsen/logrus"
 	"os"
 	"regexp"
 	"strings"
 )
+
+// fileNameIP file name
+const fileNameIP = "igcParser.go"
 
 // Record is the metadata information about a IGC approved FR recorded flight.
 // Contains information about the flight recorder itself, as well as some selected header
@@ -46,7 +48,12 @@ func (parser Parser) Parse() (rec Record) {
 	lines := strings.Split(parser.Parsed, "\n")
 
 	if len(lines) == 0 {
-		logrus.Info("No lines in file")
+		DebugLog(InternalLog{
+			Origin: fileNameIP,
+			Method: "Parse",
+			Msg:    "No lines in file",
+		})
+
 		return
 	}
 
@@ -100,7 +107,11 @@ func (parser Parser) parseH(hRecords []string) (header H) {
 		case "DTE":
 			header.Date = v[0:6]
 		default:
-			logrus.Info("Unsupported key: ", k)
+			DebugLog(InternalLog{
+				Origin: fileNameIP,
+				Method: "parseH",
+				Msg:    "Unsupported key: " + k,
+			})
 		}
 	}
 

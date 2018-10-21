@@ -28,3 +28,6 @@ gt-backend
 
 # govendor deps
 vendor/*/
+
+# Log
+\logs/
