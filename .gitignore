@@ -22,4 +22,9 @@ Records/
 
 # Sonar scanner folder
 \.scannerwork/
+
+# project binary
 gt-backend
+
+# govendor deps
+/vendor/*/
