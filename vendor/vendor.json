@@ -405,6 +405,12 @@
 			"revisionTime": "2018-09-08T17:02:15Z"
 		},
 		{
+			"checksumSHA1": "5Av7I6vgz6zu2UIJyfOZpWPOhyw=",
+			"path": "golang.org/x/tools/container/intsets",
+			"revision": "3e7aa9e59977626dc60433e9aeadf1bb63d28295",
+			"revisionTime": "2018-08-11T08:03:17Z"
+		},
+		{
 			"checksumSHA1": "RIKH6cQNe0mczH5HxseRIpEYidE=",
 			"path": "google.golang.org/api/gensupport",
 			"revision": "7ca32eb868bf53ea2fc406698eb98583a8073d19",
@@ -677,7 +683,7 @@
 	],
 	"rootPath": "github.com/GlidingTracks/gt-backend",
     "heroku" : {
-        "goVersion": "go1.11",
-        "install": ["./..."]
+      "goVersion": "go1.11",
+      "install": ["./..."]
     }
 }
