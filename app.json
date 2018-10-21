@@ -1,0 +1,23 @@
+{
+  "name": "gt-backend",
+  "scripts": {
+  },
+  "env": {
+    "GOOGLE_APPLICATION_CREDENTIALS": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/go"
+    }
+  ]
+}
