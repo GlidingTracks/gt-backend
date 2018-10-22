@@ -33,12 +33,6 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.Request) {
 	c, _, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "insertTrackRecordPage",
-			Err:    err,
-		})
-
 		http.Error(w, err.Error(), c)
 		return
 	}

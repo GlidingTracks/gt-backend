@@ -2,6 +2,8 @@ package gtbackend
 
 import (
 	"bufio"
+	"fmt"
+	"github.com/pkg/errors"
 	"os"
 	"regexp"
 	"strings"
@@ -44,18 +46,15 @@ type Parser struct {
 }
 
 // Parse - main routine for parsing a IGC-track. Returns a Record.
-func (parser Parser) Parse() (rec Record) {
-	lines := strings.Split(parser.Parsed, "\n")
-
-	if len(lines) == 0 {
-		DebugLog(InternalLog{
-			Origin: fileNameIP,
-			Method: "Parse",
-			Msg:    "No lines in file",
-		})
+func (parser Parser) Parse() (rec Record, err error) {
+	if parser.Parsed == "" {
+		fmt.Print("triggered")
+		err = errors.New("Empty file")
+		DebugLog(InternalLog{Origin: fileNameIP, Method: "Parse", Err:    err, Msg:    "No lines in file"})
 
 		return
 	}
+	lines := strings.Split(parser.Parsed, "\n")
 
 	h := parser.getHRecords(lines)
 
@@ -120,7 +119,7 @@ func (parser Parser) parseH(hRecords []string) (header H) {
 
 // fileToLines will traverse and return
 // an array with all file lines.
-func (parser Parser) fileToLines(file *os.File) (lines []string, err error) {
+func FileToLines(file *os.File) (lines []string, err error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())

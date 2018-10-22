@@ -3,24 +3,29 @@ package gtbackend
 import (
 	"github.com/Sirupsen/logrus"
 	"os"
+	"strings"
 	"testing"
 )
 
 // THIS TEST FILE NEEDS TO BE UPDATED OR DELETED TO COMPLY WITH THE NEW IGCPARSER! ALL TESTS ARE t.Skip on 1st line!
 
 func TestParse(t *testing.T) {
-	t.Skip(t) // Skipping test until it is adjusted or just removed
 	logrus.SetLevel(logrus.ErrorLevel)
 
-	parser := Parser{
-		Parsed: "./testdata/testIgc.igc",
+	ll := loadTestFile("./testdata/testIgc.igc")
+	if ll == "" {
+		t.Error("Test file could not be loaded")
 	}
 
-	md := parser.Parse()
+	parser := Parser{
+		Parsed: ll,
+	}
+
+	md, _ := parser.Parse()
 
 	t.Run("Check header parsing", func(t *testing.T) {
 		if md.Header.Pilot != "Krasimir Georgiev" {
-			t.Error("Pilot not parsed correctly")
+			t.Errorf("Pilot not parsed correctly, got: %s", md.Header.Pilot)
 		}
 	})
 
@@ -34,22 +39,28 @@ func TestParse(t *testing.T) {
 		}
 	})
 
+	t.Run("Empty string", func(t *testing.T) {
+		parser = Parser{
+			Parsed: "",
+		}
+
+		_, err := parser.Parse()
+
+		if err == nil {
+			t.Error("Error expected, got none")
+		}
+	})
 }
 
 // Utility methods
 
 func TestFileToLines(t *testing.T) {
-	t.Skip(t) // Skipping test until it is adjusted or just removed
 	file, err := os.Open("./testdata/testFileHRecords.txt")
 	if err != nil {
 		t.Error("Error received: ", err)
 	}
 
-	parser := Parser{
-		Parsed: "",
-	}
-
-	l, err := parser.fileToLines(file)
+	l, err := FileToLines(file)
 
 	defer file.Close()
 
@@ -63,19 +74,17 @@ func TestFileToLines(t *testing.T) {
 }
 
 func TestGetHRecords(t *testing.T) {
-	t.Skip(t) // Skipping test until it is adjusted or just removed
-	file, err := os.Open("./testdata/testFileHRecords.txt")
-	if err != nil {
-		t.Error("Error received: ", err)
+	ll := loadTestFile("./testdata/testFileHRecords.txt")
+	if ll == "" {
+		t.Error("Test file could not be loaded")
 	}
 
 	parser := Parser{
-		Parsed: "",
+		Parsed: ll,
 	}
 
-	l, err := parser.fileToLines(file)
-
-	h := parser.getHRecords(l)
+	arr := strings.Split(ll, "\n")
+	h := parser.getHRecords(arr)
 
 	if len(h) != 7 {
 		t.Error("Expected len 7 got: ", len(h))
@@ -83,7 +92,6 @@ func TestGetHRecords(t *testing.T) {
 }
 
 func TestStrip(t *testing.T) {
-	t.Skip(t) // Skipping test until it is adjusted or just removed
 	parser := Parser{
 		Parsed: "",
 	}
@@ -121,4 +129,22 @@ func TestStrip(t *testing.T) {
 		}
 	})
 
+}
+
+func loadTestFile(path string) (lines string) {
+	f, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+
+	defer f.Close()
+
+	ll, err := FileToLines(f)
+	if err != nil {
+		return ""
+	}
+
+	lines = strings.Join(ll, "\n")
+
+	return
 }

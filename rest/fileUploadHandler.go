@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"firebase.google.com/go"
-	"fmt"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
@@ -118,7 +117,6 @@ func processFileContent(file multipart.File, handler *multipart.FileHeader) (par
 // getUID retrieves the "uid" field from a multipart/form-data request.
 func getUID(r *http.Request) (uid string) {
 	uid = r.FormValue("uid")
-	fmt.Print(uid)
 	return
 }
 
@@ -137,7 +135,7 @@ func uploadMetadataToFirestore(app *firebase.App, uid string, parsed string, isP
 		Parsed: parsed,
 	}
 
-	pIGC := parser.Parse()
+	pIGC, _ := parser.Parse()
 
 	// Prepare md with data, TrackID as placeholder for now
 	md = models.IgcMetadata{
