@@ -136,8 +136,11 @@ func logRequest(writers []io.Writer, r *http.Request, msg string) {
 	logger := logrus.New()
 
 	entry := logger.WithFields(logrus.Fields{
-		"Address": r.RequestURI,
-		"method":  r.Method,
+		"Address":   r.RequestURI,
+		"method":    r.Method,
+		"multiform": r.MultipartForm,
+		"body":      r.Body,
+		"form":      r.Form,
 	})
 
 	for i := range writers {

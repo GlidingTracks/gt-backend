@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"firebase.google.com/go"
+	"fmt"
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
@@ -13,13 +14,14 @@ import (
 	"strings"
 )
 
-// fileNameFUH - Used in debugging. TODO remove before prod
+// fileNameFUH - Used in debugging.
 const fileNameFUH = "fileUploadHandler.go"
 
 // ProcessUploadRequest - Actual processing of the file upload
 // Inspiration: https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/04.5.html
 func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md models.IgcMetadata, err error) {
 	uid := getUID(r)
+
 	if uid == "" {
 		err = errors.New(constant.ErrorNoUIDProvided)
 		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadFilePage", Err: err})
@@ -116,17 +118,12 @@ func processFileContent(file multipart.File, handler *multipart.FileHeader) (par
 // getUID retrieves the "uid" field from a multipart/form-data request.
 func getUID(r *http.Request) (uid string) {
 	uid = r.FormValue("uid")
+	fmt.Print(uid)
 	return
 }
 
 // uploadMetadataToFirestore saves a FilePayload struct to the DB.
-func uploadMetadataToFirestore(
-	app *firebase.App,
-	uid string,
-	parsed string,
-	isPrivate bool) (
-	md models.IgcMetadata,
-	err error) {
+func uploadMetadataToFirestore(app *firebase.App, uid string, parsed string, isPrivate bool) (md models.IgcMetadata, err error) {
 	ctx := context.Background()
 
 	client, err := app.Firestore(ctx)
