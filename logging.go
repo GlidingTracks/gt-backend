@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// LoggingMiddleware - capture http.Handle
+// LoggingMiddleware - capture http.Handle.
 type LoggingMiddleware func(http.Handler) http.Handler
 
 // InternalLog internal log entry
@@ -21,6 +21,7 @@ type InternalLog struct {
 	Msg    string
 }
 
+// LogConfig enables users to dictate where log file are to be put.
 type LogConfig struct {
 	Path string
 }
@@ -29,18 +30,19 @@ var config = LogConfig{
 	LOGS,
 }
 
+// LogPath stores log directory path.
 var LogPath string
 
-// CONNECTOR log file prefix
+// CONNECTOR log file prefix.
 const CONNECTOR = "connector-log"
 
-// APPLICATION log file prefix
+// APPLICATION log file prefix.
 const APPLICATION = "application-log"
 
-// LOGS log directory name
+// LOGS log directory name.
 const LOGS = "logs"
 
-// LogIncomingRequests - Logs request traffic into our app
+// LogIncomingRequests - Logs request traffic into our app.
 func LogIncomingRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logIncomingRequests(r)
@@ -48,7 +50,7 @@ func LogIncomingRequests(next http.Handler) http.Handler {
 	})
 }
 
-// DebugLog - Log an error internally, will contain implementation specific information
+// DebugLog - Log an error internally, will contain implementation specific information.
 func DebugLog(entry InternalLog) {
 	abs, _ := filepath.Abs(config.Path)
 	setLogPath(abs)
@@ -64,7 +66,7 @@ func DebugLog(entry InternalLog) {
 	logInternal(entry, writers, "Error thrown")
 }
 
-// LogFatal log to writers and exit app
+// LogFatal log to writers and exit app.
 func LogFatal(entry InternalLog) {
 	abs, _ := filepath.Abs(config.Path)
 	setLogPath(abs)
@@ -82,7 +84,7 @@ func LogFatal(entry InternalLog) {
 	logrus.Fatal("Shutting down")
 }
 
-// GetLogWriter will return a file log writer
+// GetLogWriter will return a file log writer.
 func GetLogWriter(path string) (writer *rotatelogs.RotateLogs, err error) {
 	writer, err = rotatelogs.New(
 		path+".%Y%m%d%H%M",
@@ -94,14 +96,17 @@ func GetLogWriter(path string) (writer *rotatelogs.RotateLogs, err error) {
 	return
 }
 
+// GetLogConfig fetch logger config.
 func GetLogConfig() LogConfig {
 	return config
 }
 
+// SetLogConfig sets logger config.
 func SetLogConfig(newConfig LogConfig) {
 	config = newConfig
 }
 
+// SetLogConfigDefault restore logger initial config.
 func SetLogConfigDefault() {
 	config = LogConfig{
 		LOGS,
