@@ -29,7 +29,13 @@ func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
 		odfd = firestore.Desc
 	}
 
-	skipint, err := strconv.Atoi(t)
+	skipint := -1;
+	var err error
+
+	if t != "" {
+		skipint, err = strconv.Atoi(t)
+	}
+
 	if err != nil || skipint < 1 {
 		// Ensure that failed default timeskip will show the first page
 		// Mismatch will lead to no results as all are skipped by Tmsk

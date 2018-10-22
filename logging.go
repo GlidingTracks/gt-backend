@@ -22,12 +22,10 @@ type InternalLog struct {
 }
 
 type LogConfig struct {
-	Test bool
 	Path string
 }
 
 var config = LogConfig{
-	false,
 	LOGS,
 }
 
@@ -45,13 +43,8 @@ const LOGS = "logs"
 // LogIncomingRequests - Logs request traffic into our app
 func LogIncomingRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !config.Test {
-			logIncomingRequests(r)
-			next.ServeHTTP(w, r)
-		} else {
-			logIncomingRequests(r)
-			next.ServeHTTP(w, r)
-		}
+		logIncomingRequests(r)
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -111,7 +104,6 @@ func SetLogConfig(newConfig LogConfig) {
 
 func SetLogConfigDefault() {
 	config = LogConfig{
-		false,
 		LOGS,
 	}
 }

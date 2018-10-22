@@ -7,6 +7,7 @@ import (
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
+	"github.com/pkg/errors"
 	"google.golang.org/api/iterator"
 	"io/ioutil"
 	"net/http"
@@ -18,6 +19,11 @@ const fileNameFQH = "firebaseQueryHandler.go"
 // GetTracks gets a list of IgcMetadata from Firebase based on query
 func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error) {
 	ctx := context.Background()
+
+	if app == nil {
+		err = errors.New("Could not contact DB")
+		return
+	}
 
 	client, err := app.Firestore(ctx)
 	if err != nil {

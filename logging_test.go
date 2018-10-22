@@ -32,7 +32,6 @@ func TestGetAndSetConfig(t *testing.T) {
 	oldC := GetLogConfig()
 
 	SetLogConfig(LogConfig{
-		true,
 		testPath,
 	})
 
@@ -40,10 +39,6 @@ func TestGetAndSetConfig(t *testing.T) {
 
 	if newC == oldC {
 		t.Error("Config not changed")
-	}
-
-	if !newC.Test {
-		t.Error("Config not updated")
 	}
 
 	SetLogConfigDefault()
@@ -57,7 +52,6 @@ func TestGetAndSetConfig(t *testing.T) {
 
 func TestLogIncomingRequests(t *testing.T) {
 	SetLogConfig(LogConfig{
-		true,
 		testPath,
 	})
 
@@ -87,7 +81,6 @@ func TestLogIncomingRequests(t *testing.T) {
 
 func TestDebugLog(t *testing.T) {
 	SetLogConfig(LogConfig{
-		true,
 		testPath,
 	})
 

@@ -6,6 +6,7 @@ import (
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -47,6 +48,10 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 	tmsk := r.Header.Get("timeSkip")
 	qt := r.Header.Get("queryType")
 	ordDir := r.Header.Get("orderDirection")
+
+	if uID == "" {
+		http.Error(w, errors.New("No uId supplied").Error(), http.StatusBadRequest)
+	}
 
 	// Process request
 	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, tmsk, qt, ordDir))
