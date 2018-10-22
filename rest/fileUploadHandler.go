@@ -22,11 +22,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 	uid := getUID(r)
 	if uid == "" {
 		err = errors.New(constant.ErrorNoUIDProvided)
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "uploadFilePage",
-			Err:    err,
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadFilePage", Err: err})
 
 		httpCode = http.StatusBadRequest
 		return
@@ -37,11 +33,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 	// Get file source
 	src, handler, err := r.FormFile("file")
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "ProcessUploadRequest",
-			Err:    err,
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "ProcessUploadRequest", Err: err})
 
 		httpCode = http.StatusBadRequest
 		return
@@ -62,11 +54,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 	// Upload metadata to Cloud Firestore Database
 	md, err = uploadMetadataToFirestore(app, uid, parsed, bp)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "insertTrackRecordPage",
-			Err:    err,
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "insertTrackRecordPage", Err: err})
 
 		httpCode = http.StatusBadRequest
 
@@ -76,11 +64,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 	// Upload file to Firebase Storage
 	err = uploadFileToFirebase(app, md, parsed)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "insertTrackRecordPage",
-			Err:    err,
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "insertTrackRecordPage", Err: err})
 
 		httpCode = http.StatusBadRequest
 		return
@@ -94,12 +78,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 // https://golang.org/pkg/net/http/#DetectContentType
 func processFileContent(file multipart.File, handler *multipart.FileHeader) (parsed string, err error) {
 	if handler.Size > constant.MaxIgcFileSize {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "processFileContent",
-			Err:    err,
-			Msg:    "MaxIgcFileSize FAIL",
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "processFileContent", Err: err, Msg: "MaxIgcFileSize FAIL"})
 
 		return
 	}
@@ -107,12 +86,7 @@ func processFileContent(file multipart.File, handler *multipart.FileHeader) (par
 	buff := make([]byte, handler.Size)
 
 	if _, err = file.Read(buff); err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "processFileContent",
-			Err:    err,
-			Msg:    "Buffer error",
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "processFileContent", Err: err, Msg: "Buffer error"})
 
 		return
 	}
@@ -126,12 +100,7 @@ func processFileContent(file multipart.File, handler *multipart.FileHeader) (par
 	if !strings.Contains(handler.Filename, "."+constant.IGCExtension) || !strings.Contains(content, constant.TextPlain) {
 		err = errors.New(constant.ErrorInvalidContentType)
 
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "processFileContent",
-			Err:    err,
-			Msg:    "Content error",
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "processFileContent", Err: err, Msg: "Content error"})
 
 		return
 	}
@@ -162,11 +131,7 @@ func uploadMetadataToFirestore(
 
 	client, err := app.Firestore(ctx)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "uploadMetadataToFirestore",
-			Err:    err,
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadMetadataToFirestore", Err: err})
 
 		return
 	}
@@ -189,12 +154,7 @@ func uploadMetadataToFirestore(
 	// Upload metadata to Firestore, get document record to update TrackID later
 	cr, _, err := client.Collection(constant.IgcMetadata).Add(ctx, md)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "uploadMetadataToFirestore",
-			Err:    err,
-			Msg:    "Add error",
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadMetadataToFirestore", Err: err, Msg: "Add error"})
 
 		return
 	}
@@ -205,12 +165,7 @@ func uploadMetadataToFirestore(
 	}, firestore.MergeAll)
 	md.TrackID = cr.ID
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "uploadMetadataToFirestore",
-			Err:    err,
-			Msg:    "Set TrackID error",
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadMetadataToFirestore", Err: err, Msg: "Set TrackID error"})
 
 		return
 	}
@@ -222,22 +177,14 @@ func uploadMetadataToFirestore(
 func uploadFileToFirebase(app *firebase.App, md models.IgcMetadata, parsed string) (err error) {
 	client, err := app.Storage(context.Background())
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "uploadMetadataToFirestore",
-			Err:    err,
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadMetadataToFirestore", Err: err})
 
 		return
 	}
 
 	bucket, err := client.DefaultBucket()
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "uploadMetadataToFirestore ",
-			Err:    err,
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadMetadataToFirestore ", Err: err})
 
 		return
 	}
@@ -249,12 +196,7 @@ func uploadFileToFirebase(app *firebase.App, md models.IgcMetadata, parsed strin
 	wc.ContentType = "text/plain"
 	_, err = wc.Write([]byte(parsed))
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameFUH,
-			Method: "uploadMetadataToFirestore",
-			Err:    err,
-			Msg:    "Write error",
-		})
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFUH, Method: "uploadMetadataToFirestore", Err: err, Msg: "Write error"})
 		return
 	}
 
