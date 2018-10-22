@@ -21,6 +21,18 @@ type InternalLog struct {
 	Msg    string
 }
 
+type LogConfig struct {
+	Test bool
+	Path string
+}
+
+var config = LogConfig{
+	false,
+	LOGS,
+}
+
+var LogPath string
+
 // CONNECTOR log file prefix
 const CONNECTOR = "connector-log"
 
@@ -33,23 +45,23 @@ const LOGS = "logs"
 // LogIncomingRequests - Logs request traffic into our app
 func LogIncomingRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := filepath.Join(LOGS, CONNECTOR)
-		writer, err := GetLogWriter(path)
-		if err != nil {
-			logrus.Error(err.Error())
+		if !config.Test {
+			logIncomingRequests(r)
+			next.ServeHTTP(w, r)
+		} else {
+			logIncomingRequests(r)
+			next.ServeHTTP(w, r)
 		}
-
-		writers := []io.Writer{os.Stderr, writer}
-		logRequest(writers, r, "Incoming traffic")
-
-		next.ServeHTTP(w, r)
 	})
 }
 
 // DebugLog - Log an error internally, will contain implementation specific information
 func DebugLog(entry InternalLog) {
-	abs, _ := filepath.Abs("../" + LOGS)
+	abs, _ := filepath.Abs(config.Path)
+	setLogPath(abs)
+
 	path := filepath.Join(abs, APPLICATION)
+
 	writer, err := GetLogWriter(path)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -59,9 +71,13 @@ func DebugLog(entry InternalLog) {
 	logInternal(entry, writers, "Error thrown")
 }
 
-// FatalLog log to writers and exit app
-func FatalLog(entry InternalLog) {
-	path := LOGS + "/" + APPLICATION
+// LogFatal log to writers and exit app
+func LogFatal(entry InternalLog) {
+	abs, _ := filepath.Abs(config.Path)
+	setLogPath(abs)
+
+	path := filepath.Join(abs, APPLICATION)
+
 	writer, err := GetLogWriter(path)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -83,6 +99,36 @@ func GetLogWriter(path string) (writer *rotatelogs.RotateLogs, err error) {
 	)
 
 	return
+}
+
+func GetLogConfig() LogConfig {
+	return config
+}
+
+func SetLogConfig(newConfig LogConfig) {
+	config = newConfig
+}
+
+func SetLogConfigDefault() {
+	config = LogConfig{
+		false,
+		LOGS,
+	}
+}
+
+func logIncomingRequests(r *http.Request) {
+	abs, _ := filepath.Abs(config.Path)
+	setLogPath(abs)
+
+	path := filepath.Join(abs, CONNECTOR)
+
+	writer, err := GetLogWriter(path)
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+
+	writers := []io.Writer{os.Stderr, writer}
+	logRequest(writers, r, "Incoming traffic")
 }
 
 // logRequest message - logs incoming traffic
@@ -132,4 +178,8 @@ func setFormat(writer io.Writer, logger *logrus.Logger) {
 			DisableColors: false,
 		})
 	}
+}
+
+func setLogPath(path string) {
+	LogPath = path
 }

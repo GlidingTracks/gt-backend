@@ -17,7 +17,7 @@ import (
 func main() {
 	app, err := initializeFirebase()
 	if err != nil {
-		gtbackend.FatalLog(gtbackend.InternalLog{
+		gtbackend.LogFatal(gtbackend.InternalLog{
 			Err: err,
 		})
 	}
@@ -52,12 +52,12 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		gtbackend.FatalLog(gtbackend.InternalLog{
+		gtbackend.LogFatal(gtbackend.InternalLog{
 			Msg: "$PORT must be set",
 		})
 	}
 
-	gtbackend.FatalLog(gtbackend.InternalLog{
+	gtbackend.LogFatal(gtbackend.InternalLog{
 		Err: http.ListenAndServe(":"+port, r),
 	})
 }
@@ -84,7 +84,7 @@ func initializeFirebase() (app *firebase.App, err error) {
 
 	app, err = firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
-		gtbackend.FatalLog(gtbackend.InternalLog{
+		gtbackend.LogFatal(gtbackend.InternalLog{
 			Msg: "error initializing app",
 			Err: err,
 		})
