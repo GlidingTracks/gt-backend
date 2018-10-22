@@ -48,7 +48,7 @@ type Parser struct {
 func (parser Parser) Parse() (rec Record, err error) {
 	if parser.Parsed == "" {
 		err = errors.New("Empty file")
-		DebugLog(InternalLog{Origin: fileNameIP, Method: "Parse", Err:    err, Msg:    "No lines in file"})
+		DebugLog(InternalLog{Origin: fileNameIP, Method: "Parse", Err: err, Msg: "No lines in file"})
 
 		return
 	}
@@ -116,7 +116,7 @@ func (parser Parser) parseH(hRecords []string) (header H) {
 	return
 }
 
-// fileToLines will traverse and return
+// FileToLines will traverse and return
 // an array with all file lines.
 func FileToLines(file *os.File) (lines []string, err error) {
 	scanner := bufio.NewScanner(file)

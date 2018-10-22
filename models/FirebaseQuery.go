@@ -29,7 +29,7 @@ func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
 		odfd = firestore.Desc
 	}
 
-	skipint := -1;
+	skipint := -1
 	var err error
 
 	if t != "" {
