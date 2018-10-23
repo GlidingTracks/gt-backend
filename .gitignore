@@ -27,4 +27,7 @@ Records/
 gt-backend
 
 # govendor deps
-/vendor/*/
+vendor/*/
+
+# Log
+\logs/

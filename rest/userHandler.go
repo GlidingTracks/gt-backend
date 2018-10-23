@@ -42,7 +42,7 @@ func (userHandler UserHandler) createUserPage(w http.ResponseWriter, r *http.Req
 
 	err := unmarshal(r, &u)
 	if err != nil {
-		gtbackend.DebugLog(fileNameUH, "createUserPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "createUserPage", Err: err})
 
 		http.Error(w, errors.New(constant.ErrorProcessBodyFailed).Error(), http.StatusBadRequest)
 		return
@@ -51,7 +51,7 @@ func (userHandler UserHandler) createUserPage(w http.ResponseWriter, r *http.Req
 	// Try to create a user in firebase
 	_, err = createNewUser(userHandler.Ctx.App, u)
 	if err != nil {
-		gtbackend.DebugLog(fileNameUH, "createUserPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "createUserPage", Err: err, Msg: "Could not create user"})
 
 		http.Error(w, errors.New(constant.ErrorCouldNotCreateUser).Error(), http.StatusBadRequest)
 	}
@@ -63,7 +63,7 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 
 	err := unmarshal(r, &u)
 	if err != nil {
-		gtbackend.DebugLog(fileNameUH, "updateUserPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "updateUserPage", Err: err, Msg: "Could not unmarshal"})
 
 		http.Error(w, errors.New(constant.ErrorProcessBodyFailed).Error(), http.StatusBadRequest)
 		return
@@ -71,7 +71,7 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 
 	_, err = updateUser(userHandler.Ctx.App, u)
 	if err != nil {
-		gtbackend.DebugLog(fileNameUH, "updateUserPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "updateUserPage", Err: err, Msg: "Could not update user"})
 
 		http.Error(w, errors.New(constant.ErrorCouldNotUpdateUser).Error(), http.StatusBadRequest)
 	}
@@ -81,23 +81,27 @@ func (userHandler UserHandler) updateUserPage(w http.ResponseWriter, r *http.Req
 func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 	if queries == nil {
-		gtbackend.DebugLog(fileNameUH, "deleteUserPage", errors.New(constant.ErrorNoQueriesInPath))
+		err := errors.New(constant.ErrorNoQueriesInPath)
 
-		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "deleteUserPage", Err: err})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	uID := queries.Get("uId")
 	if uID == "" {
-		gtbackend.DebugLog(fileNameUH, "deleteUserPage", errors.New(constant.ErrorNoUIDProvided))
+		err := errors.New(constant.ErrorNoUIDProvided)
 
-		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "deleteUserPage", Err: err})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	err := deleteUser(userHandler.Ctx.App, uID)
 	if err != nil {
-		gtbackend.DebugLog(fileNameUH, "deleteUserPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "deleteUserPage", Err: err})
 
 		http.Error(w, errors.New(constant.ErrorDeleteUser).Error(), http.StatusBadRequest)
 		return
@@ -108,7 +112,7 @@ func (userHandler UserHandler) deleteUserPage(w http.ResponseWriter, r *http.Req
 func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Request) {
 	queries := r.URL.Query()
 	if queries == nil {
-		gtbackend.DebugLog(fileNameUH, "getUserPage", errors.New(constant.ErrorNoQueriesInPath))
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "getUserPage", Err: errors.New(constant.ErrorNoQueriesInPath)})
 
 		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
 		return
@@ -116,15 +120,17 @@ func (userHandler UserHandler) getUserPage(w http.ResponseWriter, r *http.Reques
 
 	uID := queries.Get("uId")
 	if uID == "" {
-		gtbackend.DebugLog(fileNameUH, "getUserPage", errors.New(constant.ErrorNoUIDProvided))
+		err := errors.New(constant.ErrorNoUIDProvided)
 
-		http.Error(w, errors.New(constant.ErrorNoUIDProvided).Error(), http.StatusBadRequest)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "getUserPage", Err: err})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	u, err := getUser(userHandler.Ctx.App, uID)
 	if err != nil {
-		gtbackend.DebugLog(fileNameUH, "getUserPage", err)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameUH, Method: "getUserPage", Err: err})
 
 		http.Error(w, errors.New(constant.ErrorCouldNotGetUser).Error(), http.StatusBadRequest)
 		return

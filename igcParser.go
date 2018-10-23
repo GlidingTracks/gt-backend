@@ -2,11 +2,14 @@ package gtbackend
 
 import (
 	"bufio"
-	"github.com/Sirupsen/logrus"
+	"github.com/pkg/errors"
 	"os"
 	"regexp"
 	"strings"
 )
+
+// fileNameIP file name
+const fileNameIP = "igcParser.go"
 
 // Record is the metadata information about a IGC approved FR recorded flight.
 // Contains information about the flight recorder itself, as well as some selected header
@@ -42,13 +45,15 @@ type Parser struct {
 }
 
 // Parse - main routine for parsing a IGC-track. Returns a Record.
-func (parser Parser) Parse() (rec Record) {
-	lines := strings.Split(parser.Parsed, "\n")
+func (parser Parser) Parse() (rec Record, err error) {
+	if parser.Parsed == "" {
+		err = errors.New("Empty file")
+		DebugLog(InternalLog{Origin: fileNameIP, Method: "Parse", Err: err, Msg: "No lines in file"})
 
-	if len(lines) == 0 {
-		logrus.Info("No lines in file")
 		return
 	}
+
+	lines := strings.Split(parser.Parsed, "\n")
 
 	h := parser.getHRecords(lines)
 
@@ -100,16 +105,20 @@ func (parser Parser) parseH(hRecords []string) (header H) {
 		case "DTE":
 			header.Date = v[0:6]
 		default:
-			logrus.Info("Unsupported key: ", k)
+			DebugLog(InternalLog{
+				Origin: fileNameIP,
+				Method: "parseH",
+				Msg:    "Unsupported key: " + k,
+			})
 		}
 	}
 
 	return
 }
 
-// fileToLines will traverse and return
+// FileToLines will traverse and return
 // an array with all file lines.
-func (parser Parser) fileToLines(file *os.File) (lines []string, err error) {
+func FileToLines(file *os.File) (lines []string, err error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
