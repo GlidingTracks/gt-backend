@@ -56,7 +56,7 @@ func main() {
 
 	rCors := cors.AllowAll().Handler(r)
 
-	port := "8080"
+	port := os.Getenv("PORT")
 	if port == "" {
 		gtbackend.LogFatal(gtbackend.InternalLog{
 			Msg: "$PORT must be set",
