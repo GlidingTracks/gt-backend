@@ -26,8 +26,11 @@ func main() {
 		App: app,
 	}
 
+	sec := gtbackend.SecurityMiddleware{App: app}
+
 	r := mux.NewRouter()
 	r.Use(gtbackend.LogIncomingRequests)
+	r.Use(sec.CheckIncomingRequests)
 
 	userRoutes := &rest.UserHandler{
 		Ctx:            *ctx,
