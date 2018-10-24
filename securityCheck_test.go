@@ -42,10 +42,10 @@ func TestSecurityMiddleware_CheckIncomingRequests(t *testing.T) {
 }
 
 type authResponse struct {
-	Kind string
-	IdToken string
+	Kind         string
+	IdToken      string
 	RefreshToken string
-	ExpiresIn string
+	ExpiresIn    string
 }
 
 func RetrieveFirebaseIDToken() (app *firebase.App, token string) {
@@ -73,7 +73,7 @@ func RetrieveFirebaseIDToken() (app *firebase.App, token string) {
 	"token": "` + token + `",
 	"returnSecureToken": true
 	}`)
-	res, err := http.Post( "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=AIzaSyAppC_L-VHnTM1ezOvuiVCoKfFzFu6f5ZU", "application/json", bytes.NewBuffer(jsonStr))
+	res, err := http.Post("https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=AIzaSyAppC_L-VHnTM1ezOvuiVCoKfFzFu6f5ZU", "application/json", bytes.NewBuffer(jsonStr))
 	if err != nil || res.StatusCode != http.StatusOK {
 		fmt.Printf("%+v\n", string(jsonStr))
 		logrus.Fatalf("error retrieving id token: %v\n", err)
