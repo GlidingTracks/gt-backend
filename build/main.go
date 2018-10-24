@@ -7,6 +7,7 @@ import (
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/rest"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"net/http"
@@ -53,9 +54,9 @@ func main() {
 
 	r.HandleFunc("/", startPage)
 
-	mux.CORSMethodMiddleware(r)
+	rCors := cors.AllowAll().Handler(r)
 
-	port := os.Getenv("PORT")
+	port := "8080"
 	if port == "" {
 		gtbackend.LogFatal(gtbackend.InternalLog{
 			Msg: "$PORT must be set",
@@ -63,7 +64,7 @@ func main() {
 	}
 
 	gtbackend.LogFatal(gtbackend.InternalLog{
-		Err: http.ListenAndServe(":"+port, r),
+		Err: http.ListenAndServe(":"+port, rCors),
 	})
 }
 

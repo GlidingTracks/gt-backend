@@ -17,8 +17,6 @@ type SecurityMiddleware struct {
 // CheckIncomingRequests - Logs request traffic into our app.
 func (sec *SecurityMiddleware) CheckIncomingRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*") // Permit X-Origin
-
 		if checkIncomingRequests(r, sec.App) {
 			next.ServeHTTP(w, r)
 		} else {
