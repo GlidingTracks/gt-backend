@@ -53,6 +53,8 @@ func main() {
 
 	r.HandleFunc("/", startPage)
 
+	mux.CORSMethodMiddleware(r)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		gtbackend.LogFatal(gtbackend.InternalLog{
