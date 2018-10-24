@@ -41,7 +41,7 @@ func RetrieveFirebaseIDToken() (app *firebase.App, token string) {
 	config := &firebase.Config{
 		StorageBucket: "gt-backend-8b9c2.appspot.com",
 	}
-	opt := option.WithCredentialsFile("../" + constant.GoogleServiceCredName)
+	opt := option.WithCredentialsFile(constant.GoogleServiceCredName)
 
 	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
