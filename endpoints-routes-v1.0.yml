@@ -79,37 +79,13 @@
       description: bad-request, the payload is proberly badly formatted, server cannot decode
       content-type: application/json
 
-# Deprecated, use insertTrack instead
-/uploadFile:
-  method: POST
-  summary: Upload a IGC file to the server
-  params:
-    - name: uid
-      type: string
-      description: Uploading user's id
-      required: true
-    - name: file
-      type: string
-      description:
-      required: true
-  responses:
-    - code: 200
-      reason: File successfully processed
-      content-type: application/json
-    - code: 400
-      reason: something went wrong in processing the file or no supplied uid
-      content-type: application/json
-    - code: 415
-      reason: File not off correct mime. We only support .IGC
-      content-type: application/json
-
 /getTracks:
   method: GET
     summary: Get list of IGC tracks
     params:
-    - name: uid
+    - name: token
       type: string
-      description: Requesting user id
+      description: IDToken provided by Firebase Auth
       required: true
     - name: timeSkip
       type: string
@@ -140,9 +116,9 @@
     header: multipart/form-data
     summary: Upload a IGC file to the server
     params:
-    - name: uid
-      type: string, form-data
-      description: Uploading user's id
+    - name: token
+      type: string
+      description: IDToken provided by Firebase Auth
       required: true
     - name: private
       type: boolean, form-data
@@ -167,6 +143,10 @@
   method: GET
     summary: Get an IGC file from the server based on TrackID
     params:
+    - name: token
+      type: string
+      description: IDToken provided by Firebase Auth
+      required: true
     - name: trackID
       type: string
       description: Track ID to get
@@ -183,6 +163,10 @@
   method: DELETE
     summary: Deletes an IGC file from the server based on TrackID
     params:
+    - name: token
+      type: string
+      description: IDToken provided by Firebase Auth
+      required: true
     - name: trackID
       type: string
       description: Track ID to get

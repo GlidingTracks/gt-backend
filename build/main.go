@@ -7,6 +7,7 @@ import (
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/rest"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"net/http"
@@ -26,8 +27,11 @@ func main() {
 		App: app,
 	}
 
+	sec := gtbackend.SecurityMiddleware{App: app}
+
 	r := mux.NewRouter()
 	r.Use(gtbackend.LogIncomingRequests)
+	r.Use(sec.CheckIncomingRequests)
 
 	userRoutes := &rest.UserHandler{
 		Ctx:            *ctx,
@@ -50,6 +54,8 @@ func main() {
 
 	r.HandleFunc("/", startPage)
 
+	rCors := cors.AllowAll().Handler(r)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		gtbackend.LogFatal(gtbackend.InternalLog{
@@ -58,7 +64,7 @@ func main() {
 	}
 
 	gtbackend.LogFatal(gtbackend.InternalLog{
-		Err: http.ListenAndServe(":"+port, r),
+		Err: http.ListenAndServe(":"+port, rCors),
 	})
 }
 

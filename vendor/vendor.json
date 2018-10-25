@@ -231,6 +231,12 @@
 			"revisionTime": "2018-10-20T22:29:33Z"
 		},
 		{
+			"checksumSHA1": "HiK8dVEr2ZRCb49HK1seH3u6ojM=",
+			"path": "github.com/rs/cors",
+			"revision": "a3460e445dd310dbefee993fe449f2ff9c08ae71",
+			"revisionTime": "2018-10-11T18:27:59Z"
+		},
+		{
 			"checksumSHA1": "1dd8tjW3xNUE6wV1T42Tmw/JN/s=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "4fabf2fffcecfd47f802869b7b92d75e43c5a095",
@@ -721,9 +727,5 @@
 			"revision": ""
 		}
 	],
-	"rootPath": "github.com/GlidingTracks/gt-backend",
-	"heroku" : {
-		"goVersion": "go1.11",
-		"install": ["./..."]
-	}
+	"rootPath": "github.com/GlidingTracks/gt-backend"
 }
