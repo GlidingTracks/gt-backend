@@ -116,7 +116,7 @@ func processFileContent(file multipart.File, handler *multipart.FileHeader) (par
 
 // getUID retrieves the "uid" field from a multipart/form-data request.
 func getUID(r *http.Request) (uid string) {
-	uid = r.FormValue("uid")
+	uid = r.Header.Get("uid")
 	return
 }
 
