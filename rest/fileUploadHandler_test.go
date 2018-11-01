@@ -8,18 +8,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 )
 
 func TestProcessUploadRequestWrongContentType(t *testing.T) {
 	app := InitializeFirebaseTest()
 	values := map[string]io.Reader{
-		"uid":  strings.NewReader("123"),
 		"file": mustOpen("../testdata/text.txt"),
 	}
 
 	req, err := createMultipart(values, "/upload", "POST")
+	req.Header.Set("uid", "123")
 	if err != nil {
 		t.Error("Could not create multipart")
 	}
@@ -36,11 +35,12 @@ func TestProcessUploadRequestWrongContentType(t *testing.T) {
 func TestProcessUpload(t *testing.T) {
 	app := InitializeFirebaseTest()
 	values := map[string]io.Reader{
-		"uid":  strings.NewReader("123"),
 		"file": mustOpen("../testdata/testIgc.igc"),
 	}
 
+
 	req, err := createMultipart(values, "/upload", "POST")
+	req.Header.Set("uid", "123")
 	if err != nil {
 		t.Error("Could not create multipart")
 	}
