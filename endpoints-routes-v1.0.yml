@@ -118,7 +118,7 @@
     params:
     - name: token
       type: string
-      description: IDToken provided by Firebase Auth
+      description: IDToken provided by Firebase Auth, put in Header
       required: true
     - name: private
       type: boolean, form-data
