@@ -15,10 +15,21 @@ import (
 
 // Normal firebase initialization for testing purposes, no auth token
 func InitializeFirebaseTest() (app *firebase.App) {
+	app = InitializeFirebaseTestCredFile(true)
+	return
+}
+
+func InitializeFirebaseTestCredFile(credNotInFolder bool) (app *firebase.App) {
 	config := &firebase.Config{
 		StorageBucket: "gt-backend-8b9c2.appspot.com",
 	}
-	opt := option.WithCredentialsFile("../" + constant.GoogleServiceCredName)
+	credPath := ""
+	if credNotInFolder {
+		credPath = "../" + constant.GoogleServiceCredName
+	} else {
+		credPath = constant.GoogleServiceCredName
+	}
+	opt := option.WithCredentialsFile(credPath)
 
 	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
@@ -37,10 +48,23 @@ type authResponse struct {
 
 // Firebase initialization with auth token to get past security checking
 func RetrieveFirebaseIDToken() (app *firebase.App, token string) {
+	app, token = RetrieveFirebaseIDTokenCredFile(true)
+	return
+}
+
+// Firebase initialization with auth token to get past security checking, with flag to open Firebase file in different folder
+func RetrieveFirebaseIDTokenCredFile(credNotInFolder bool) (app *firebase.App, token string) {
 	config := &firebase.Config{
 		StorageBucket: "gt-backend-8b9c2.appspot.com",
 	}
-	opt := option.WithCredentialsFile("../" + constant.GoogleServiceCredName)
+
+	credPath := ""
+	if credNotInFolder {
+		credPath = "../" + constant.GoogleServiceCredName
+	} else {
+		credPath = constant.GoogleServiceCredName
+	}
+	opt := option.WithCredentialsFile(credPath)
 
 	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {

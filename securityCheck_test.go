@@ -9,7 +9,7 @@ import (
 )
 
 func TestSecurityMiddleware_CheckIncomingRequests(t *testing.T) {
-	app, token := testutils.RetrieveFirebaseIDToken()
+	app, token := testutils.RetrieveFirebaseIDTokenCredFile(false)
 
 	sec := SecurityMiddleware{App: app}
 
