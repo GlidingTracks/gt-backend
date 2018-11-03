@@ -6,8 +6,6 @@ import (
 	"github.com/GlidingTracks/gt-backend"
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/rest"
-	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"net/http"
@@ -23,38 +21,7 @@ func main() {
 		})
 	}
 
-	ctx := &rest.Context{
-		App: app,
-	}
-
-	sec := gtbackend.SecurityMiddleware{App: app}
-
-	r := mux.NewRouter()
-	r.Use(gtbackend.LogIncomingRequests)
-	r.Use(sec.CheckIncomingRequests)
-
-	userRoutes := &rest.UserHandler{
-		Ctx:            *ctx,
-		CreateUserPage: "/createUser",
-		UpdateUserPage: "/updateUser",
-		DeleteUserPage: "/deleteUser",
-		GetUserPage:    "/getUser",
-	}
-
-	dbRoutes := &rest.DbHandler{
-		Ctx:         *ctx,
-		InsertTrack: "/insertTrack",
-		GetTracks:   "/getTracks",
-		GetTrack:    "/getTrack",
-		DeleteTrack: "/deleteTrack",
-	}
-
-	userRoutes.Bind(r)
-	dbRoutes.Bind(r)
-
-	r.HandleFunc("/", startPage)
-
-	rCors := cors.AllowAll().Handler(r)
+	rCors := rest.CompleteRouterSetup(app)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -66,12 +33,6 @@ func main() {
 	gtbackend.LogFatal(gtbackend.InternalLog{
 		Err: http.ListenAndServe(":"+port, rCors),
 	})
-}
-
-// startPage redirects every non-existing path to url: localhost:8080/.
-func startPage(w http.ResponseWriter, r *http.Request) {
-	err := errors.New("page not found")
-	http.Error(w, err.Error(), http.StatusBadRequest)
 }
 
 // initializeFirebase gets a App object from Firebase, based on the service account credentials.
