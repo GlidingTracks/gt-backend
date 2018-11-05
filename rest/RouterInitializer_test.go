@@ -20,5 +20,5 @@ func TestStartPage(t *testing.T) {
 	// Test random path
 	req = httptest.NewRequest("GET", "/randomPath", nil)
 	req.Header.Set("token", token)
-	_ = testutils.TestRoute(req, r, "RandomPath", t, http.StatusBadRequest)
+	_ = testutils.TestRoute(req, r, "RandomPath", t, http.StatusNotFound)
 }
