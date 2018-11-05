@@ -13,12 +13,13 @@ import (
 	"net/http"
 )
 
-// Normal firebase initialization for testing purposes, no auth token
+// InitializeFirebaseTest Normal firebase initialization for testing purposes, no auth token
 func InitializeFirebaseTest() (app *firebase.App) {
 	app = InitializeFirebaseTestCredFile(true)
 	return
 }
 
+// InitializeFirebaseTestCredFile Firebase initialization with auth token to get past security checking, with flag to open Firebase file in different folder
 func InitializeFirebaseTestCredFile(credNotInFolder bool) (app *firebase.App) {
 	config := &firebase.Config{
 		StorageBucket: "gt-backend-8b9c2.appspot.com",
@@ -41,18 +42,18 @@ func InitializeFirebaseTestCredFile(credNotInFolder bool) (app *firebase.App) {
 
 type authResponse struct {
 	Kind         string
-	IdToken      string
+	IDToken      string
 	RefreshToken string
 	ExpiresIn    string
 }
 
-// Firebase initialization with auth token to get past security checking
+// RetrieveFirebaseIDToken Firebase initialization with auth token to get past security checking
 func RetrieveFirebaseIDToken() (app *firebase.App, token string) {
 	app, token = RetrieveFirebaseIDTokenCredFile(true)
 	return
 }
 
-// Firebase initialization with auth token to get past security checking, with flag to open Firebase file in different folder
+// RetrieveFirebaseIDTokenCredFile Firebase initialization with auth token to get past security checking, with flag to open Firebase file in different folder
 func RetrieveFirebaseIDTokenCredFile(credNotInFolder bool) (app *firebase.App, token string) {
 	config := &firebase.Config{
 		StorageBucket: "gt-backend-8b9c2.appspot.com",
@@ -102,7 +103,7 @@ func RetrieveFirebaseIDTokenCredFile(credNotInFolder bool) (app *firebase.App, t
 		logrus.Fatalf("error parsing json of id token request: %v\n", err)
 	}
 
-	token = resParsed.IdToken
+	token = resParsed.IDToken
 
 	return
 }
