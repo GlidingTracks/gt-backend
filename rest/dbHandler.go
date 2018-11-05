@@ -40,7 +40,17 @@ func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.
 
 	// Convert to JSON and prepare response
 	d, err := json.Marshal(md)
-	w = prepareGeneralResponse(w, d, constant.ApplicationJSON, err, "insertTrackRecordPage")
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "insertTrack",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w = prepareGeneralResponse(w, d, constant.ApplicationJSON)
 	return
 }
 
@@ -71,7 +81,17 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 
 	// Convert to JSON and prepare response
 	rd, err := json.Marshal(d)
-	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON, err, "getTracksPage")
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "getTracks",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
 	return
 }
 
@@ -93,7 +113,7 @@ func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Send response
-	w = prepareGeneralResponse(w, d, constant.TextPlain, nil, "getTrackPage")
+	w = prepareGeneralResponse(w, d, constant.TextPlain)
 	return
 }
 
@@ -114,25 +134,15 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w = prepareGeneralResponse(w, []byte(trackID), constant.TextPlain, nil, "deleteTrackPage")
+	w = prepareGeneralResponse(w, []byte(trackID), constant.TextPlain)
 	return
 }
 
 // Prepares a general response to send back to the client, setting various common variables in the ResponseWriter
-func prepareGeneralResponse(unPrepW http.ResponseWriter, rawData []byte, contentType string, jsonError error, callerFunc string) (prepW http.ResponseWriter) {
+func prepareGeneralResponse(unPrepW http.ResponseWriter, rawData []byte, contentType string) (prepW http.ResponseWriter) {
 	prepW = unPrepW
-	if jsonError != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: callerFunc + "-prepareGeneralResponse",
-			Err:    jsonError,
-		})
 
-		http.Error(prepW, jsonError.Error(), http.StatusBadRequest)
-		return
-	}
-
-	prepW.Header().Set("Content-Type", contentType)
+	prepW.Header().Set(constant.ContentType, contentType)
 	prepW.WriteHeader(http.StatusOK)
 	prepW.Write(rawData)
 	return
