@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"github.com/GlidingTracks/gt-backend/testutils"
 	"github.com/Sirupsen/logrus"
 	"io"
 	"mime/multipart"
@@ -12,7 +13,7 @@ import (
 )
 
 func TestProcessUploadRequestWrongContentType(t *testing.T) {
-	app := InitializeFirebaseTest()
+	app := testutils.InitializeFirebaseTest()
 	values := map[string]io.Reader{
 		"file": mustOpen("../testdata/text.txt"),
 	}
@@ -33,11 +34,10 @@ func TestProcessUploadRequestWrongContentType(t *testing.T) {
 
 // Tests ProcessUploadRequest, and also DeleteTrack to clean up and test that too
 func TestProcessUpload(t *testing.T) {
-	app := InitializeFirebaseTest()
+	app := testutils.InitializeFirebaseTest()
 	values := map[string]io.Reader{
 		"file": mustOpen("../testdata/testIgc.igc"),
 	}
-
 
 	req, err := createMultipart(values, "/upload", "POST")
 	req.Header.Set("uid", "123")

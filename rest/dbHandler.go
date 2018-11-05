@@ -32,13 +32,26 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
 // and inserted into the DB.
 func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.Request) {
-	c, _, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
+	c, md, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
 	if err != nil {
 		http.Error(w, err.Error(), c)
 		return
 	}
 
-	w.WriteHeader(c)
+	// Convert to JSON and prepare response
+	d, err := json.Marshal(md)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "insertTrack",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w = prepareGeneralResponse(w, d, constant.ApplicationJSON)
+	return
 }
 
 // getTracksPage retrieves a page of track metadata for the user
@@ -66,23 +79,19 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Convert to JSON
+	// Convert to JSON and prepare response
 	rd, err := json.Marshal(d)
 	if err != nil {
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameDB,
-			Method: "getTracksPage",
+			Method: "getTracks",
 			Err:    err,
 		})
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	// Send response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(rd)
+	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
 	return
 }
 
@@ -104,9 +113,7 @@ func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Send response
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(200)
-	w.Write(d)
+	w = prepareGeneralResponse(w, d, constant.TextPlain)
 	return
 }
 
@@ -116,7 +123,7 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 
 	// Process request
 	c, err := DeleteTrack(dbHandler.Ctx.App, trackID)
-	if err != nil {
+	if err != nil || c != http.StatusOK {
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameDB,
 			Method: "deleteTrackPage",
@@ -127,7 +134,16 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Send response
-	w.WriteHeader(c)
+	w = prepareGeneralResponse(w, []byte(trackID), constant.TextPlain)
+	return
+}
+
+// Prepares a general response to send back to the client, setting various common variables in the ResponseWriter
+func prepareGeneralResponse(unPrepW http.ResponseWriter, rawData []byte, contentType string) (prepW http.ResponseWriter) {
+	prepW = unPrepW
+
+	prepW.Header().Set(constant.ContentType, contentType)
+	prepW.WriteHeader(http.StatusOK)
+	prepW.Write(rawData)
 	return
 }

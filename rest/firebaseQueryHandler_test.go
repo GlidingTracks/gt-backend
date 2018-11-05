@@ -2,11 +2,12 @@ package rest
 
 import (
 	"github.com/GlidingTracks/gt-backend/models"
+	"github.com/GlidingTracks/gt-backend/testutils"
 	"testing"
 )
 
 func TestGetTracks(t *testing.T) {
-	app := InitializeFirebaseTest()
+	app := testutils.InitializeFirebaseTest()
 
 	testUID := "iP1dgAHJ2JNce4hGr9H0RugkCHP2"
 	privateQ := models.NewFirebaseQuery(testUID, "1", "Private", "Asc")
@@ -41,7 +42,7 @@ func TestGetTracks(t *testing.T) {
 }
 
 func TestGetTrack(t *testing.T) {
-	app := InitializeFirebaseTest()
+	app := testutils.InitializeFirebaseTest()
 
 	data, err := GetTrack(app, "HAGOdywD9rQayoOOIHyd")
 	if err != nil && len(data) < 1 {
