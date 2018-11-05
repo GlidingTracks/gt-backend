@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -61,19 +62,9 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	req.Header.Set("token", token)
 
 	// Run insertTrack
-	rw := httptest.NewRecorder()
-	r.ServeHTTP(rw, req)
-	if rw.Result().StatusCode != 200 {
-		t.Error("Failed InsertTrack")
-	}
-
-	// Extract data from insertTrack
-	insertRwBody, err := ioutil.ReadAll(rw.Body)
-	if err != nil {
-		t.Error("Failed reading body of InsertTrack")
-	}
+	ret := testutils.TestRoute(req, r, "InsertTrack", t, http.StatusOK)
 	var insertBody models.IgcMetadata
-	err = json.Unmarshal(insertRwBody, &insertBody)
+	err = json.Unmarshal(ret, &insertBody)
 	if err != nil {
 		t.Error("Failed extracting metadata response of InsertTrack")
 	}
@@ -86,21 +77,11 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	req.Header.Set("orderDirection", "Desc")
 
 	// Run getTracks
-	rw = httptest.NewRecorder()
-	r.ServeHTTP(rw, req)
-	if rw.Result().StatusCode != 200 {
-		t.Error("Failed InsertTrack")
-	}
-
-	// Extract data from getTracks
-	getTracksRwBody, err := ioutil.ReadAll(rw.Body)
-	if err != nil {
-		t.Error("Failed reading body of InsertTrack")
-	}
+	ret = testutils.TestRoute(req, r, "GetTracks", t, http.StatusOK)
 	var getTracksBody []models.IgcMetadata
-	err = json.Unmarshal(getTracksRwBody, &getTracksBody)
+	err = json.Unmarshal(ret, &getTracksBody)
 	if err != nil {
-		t.Error("Failed extracting metadata response of InsertTrack")
+		t.Error("Failed extracting metadata response of GetTracks")
 	}
 
 	// Test getTracks data against insertTrack data
@@ -116,19 +97,9 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	req.Header.Set("trackID", insertBody.TrackID)
 
 	// Run getTrack
-	rw = httptest.NewRecorder()
-	r.ServeHTTP(rw, req)
-	if rw.Result().StatusCode != 200 {
-		t.Error("Failed GetTrack")
-	}
-
-	// Extract data from getTrack
-	getTrackBody, err := ioutil.ReadAll(rw.Body)
-	if err != nil {
-		t.Error("Failed GetTrack body read")
-	}
+	ret = testutils.TestRoute(req, r, "GetTrack", t, http.StatusOK)
 	var builder strings.Builder
-	builder.Write(getTrackBody)
+	builder.Write(ret)
 	parsedGetTrackBody := builder.String()
 	builder.Reset()
 
@@ -152,19 +123,8 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	req.Header.Set("token", token)
 	req.Header.Set("trackID", insertBody.TrackID)
 
-	// Run deleteTrack
-	rw = httptest.NewRecorder()
-	r.ServeHTTP(rw, req)
-	if rw.Result().StatusCode != 200 {
-		t.Error("Failed GetTrack")
-	}
-
-	// Extract data from deleteTrack
-	deleteTrackBody, err := ioutil.ReadAll(rw.Body)
-	if err != nil {
-		t.Error("Failed GetTrack body read")
-	}
-	builder.Write(deleteTrackBody)
+	ret = testutils.TestRoute(req, r, "DeleteTrack", t, http.StatusOK)
+	builder.Write(ret)
 	parsedDeleteTrackBody := builder.String()
 	builder.Reset()
 

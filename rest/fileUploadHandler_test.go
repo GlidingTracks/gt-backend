@@ -39,7 +39,6 @@ func TestProcessUpload(t *testing.T) {
 		"file": mustOpen("../testdata/testIgc.igc"),
 	}
 
-
 	req, err := createMultipart(values, "/upload", "POST")
 	req.Header.Set("uid", "123")
 	if err != nil {

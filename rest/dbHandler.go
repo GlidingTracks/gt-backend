@@ -103,7 +103,7 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 
 	// Process request
 	c, err := DeleteTrack(dbHandler.Ctx.App, trackID)
-	if err != nil && c != http.StatusOK{
+	if err != nil || c != http.StatusOK {
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameDB,
 			Method: "deleteTrackPage",
@@ -119,7 +119,7 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 }
 
 // Prepares a general response to send back to the client, setting various common variables in the ResponseWriter
-func prepareGeneralResponse(unPrepW http.ResponseWriter, rawData []byte, contentType string, jsonError error, callerFunc string) (prepW http.ResponseWriter){
+func prepareGeneralResponse(unPrepW http.ResponseWriter, rawData []byte, contentType string, jsonError error, callerFunc string) (prepW http.ResponseWriter) {
 	prepW = unPrepW
 	if jsonError != nil {
 		gtbackend.DebugLog(gtbackend.InternalLog{
@@ -133,7 +133,7 @@ func prepareGeneralResponse(unPrepW http.ResponseWriter, rawData []byte, content
 	}
 
 	prepW.Header().Set("Content-Type", contentType)
-	prepW.WriteHeader(200)
+	prepW.WriteHeader(http.StatusOK)
 	prepW.Write(rawData)
 	return
 }

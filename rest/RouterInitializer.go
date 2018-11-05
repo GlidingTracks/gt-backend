@@ -21,14 +21,6 @@ func CompleteRouterSetup(app *firebase.App) (handler http.Handler) {
 	r.Use(gtbackend.LogIncomingRequests)
 	r.Use(sec.CheckIncomingRequests)
 
-	userRoutes := UserHandler{
-		Ctx:            ctx,
-		CreateUserPage: "/createUser",
-		UpdateUserPage: "/updateUser",
-		DeleteUserPage: "/deleteUser",
-		GetUserPage:    "/getUser",
-	}
-
 	dbRoutes := DbHandler{
 		Ctx:         ctx,
 		InsertTrack: "/insertTrack",
@@ -37,7 +29,6 @@ func CompleteRouterSetup(app *firebase.App) (handler http.Handler) {
 		DeleteTrack: "/deleteTrack",
 	}
 
-	userRoutes.Bind(r)
 	dbRoutes.Bind(r)
 
 	r.HandleFunc("/", startPage)
