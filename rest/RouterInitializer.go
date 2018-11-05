@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// Sets up all routing used by the backend, function public for tests wanting to do full E2E tests
+// CompleteRouterSetup Sets up all routing used by the backend, function public for tests wanting to do full E2E tests
 func CompleteRouterSetup(app *firebase.App) (handler http.Handler) {
 	ctx := Context{
 		App: app,

@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// Helper function used to send a prepared request to the handler in tests
+// TestRoute Helper function used to send a prepared request to the handler in tests
 func TestRoute(req *http.Request, r http.Handler, methodName string, t *testing.T, expectedReturnCode int) (parsedBody []byte) {
 	// Run route
 	rw := httptest.NewRecorder()
