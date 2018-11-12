@@ -83,4 +83,3 @@ func RetrieveFirebaseIDToken(app *firebase.App, uid string) (token string) {
 	token = resParsed.IDToken
 	return
 }
-

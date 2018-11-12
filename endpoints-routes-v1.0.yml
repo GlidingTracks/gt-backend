@@ -157,3 +157,27 @@
     - code: 400
       description: bad request, cannot handle the request
       content-type: application/json
+
+/insertTrackPoint:
+  method: PUT
+    summary: Inserts trackpoint data to a certain track
+    params:
+    - name: token
+      type: string
+      description: IDToken provided by Firebase Auth
+      required: true
+    - name: trackID
+      type: string
+      description: Track ID to add trackpoints to
+      required: true
+    - name: trackPoints
+      type: json array with models.TrackPoint
+      description: Trackpoints to add
+      required: true
+    response:
+    - code: 200
+      description: Privacy updated successfully
+      content-type: text/plain
+    - code: 400
+      description: bad request, cannot handle the request
+      content-type: application/json

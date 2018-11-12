@@ -22,13 +22,14 @@ func CompleteRouterSetup(app *firebase.App) (handler http.Handler) {
 	r.Use(sec.CheckIncomingRequests)
 
 	dbRoutes := DbHandler{
-		Ctx:           ctx,
-		InsertTrack:   "/insertTrack",
-		GetTracks:     "/getTracks",
-		GetTrack:      "/getTrack",
-		DeleteTrack:   "/deleteTrack",
-		UpdatePrivacy: "/updatePrivacy",
-		TakeOwnership: "/takeOwnership",
+		Ctx:              ctx,
+		InsertTrack:      "/insertTrack",
+		GetTracks:        "/getTracks",
+		GetTrack:         "/getTrack",
+		DeleteTrack:      "/deleteTrack",
+		UpdatePrivacy:    "/updatePrivacy",
+		TakeOwnership:    "/takeOwnership",
+		InsertTrackPoint: "/insertTrackPoint",
 	}
 
 	dbRoutes.Bind(r)

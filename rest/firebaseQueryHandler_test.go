@@ -81,5 +81,24 @@ func TestUpdatePrivacy(t *testing.T) {
 	}
 }
 
+func TestInsertTrackPoint(t *testing.T) {
+	app := testutils.InitializeFirebaseTest()
+
+	trackID := "scf6Xw4pwCKGeLjrVJHo"
+	var testTrackPointArray []models.TrackPoint
+	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
+
+	data, err := InsertTrackPoint(app, trackID, constant.TestUID, testTrackPointArray)
+	if err != nil {
+		t.Error("InsertTrackPoint failed uploading track points")
+	}
+	if data.TrackPoints[0] != testutils.InsertTrackPointTestData {
+		t.Error("InsertTrackPoint insertion should be same as object that was sent")
+	}
+}
+
 // DeleteTrack method tested in fileUploadHandler_test
 // TakeOwnership method tested in fileUploadHandler_test

@@ -14,13 +14,14 @@ const fileNameDB = "dbHandler.go"
 
 // DbHandler holds the context and routes for this handler.
 type DbHandler struct {
-	Ctx           Context
-	InsertTrack   string
-	GetTracks     string
-	GetTrack      string
-	DeleteTrack   string
-	UpdatePrivacy string
-	TakeOwnership string
+	Ctx              Context
+	InsertTrack      string
+	GetTracks        string
+	GetTrack         string
+	DeleteTrack      string
+	UpdatePrivacy    string
+	TakeOwnership    string
+	InsertTrackPoint string
 }
 
 // Bind sets up the routes to the mux router.
@@ -31,6 +32,7 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Methods(constant.Delete)
 	r.HandleFunc(dbHandler.UpdatePrivacy, dbHandler.updatePrivacyPage).Methods(constant.Put)
 	r.HandleFunc(dbHandler.TakeOwnership, dbHandler.takeOwnershipPage).Methods(constant.Put)
+	r.HandleFunc(dbHandler.InsertTrackPoint, dbHandler.insertTrackPointPage).Methods(constant.Put)
 }
 
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
@@ -183,7 +185,7 @@ func (dbHandler DbHandler) takeOwnershipPage(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameDB,
-			Method: "updatePrivacyPage",
+			Method: "takeOwnershipPage",
 			Err:    err,
 		})
 
@@ -196,7 +198,53 @@ func (dbHandler DbHandler) takeOwnershipPage(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameDB,
-			Method: "updatePrivacyPage",
+			Method: "takeOwnershipPage",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
+	return
+}
+
+func (dbHandler DbHandler) insertTrackPointPage(w http.ResponseWriter, r *http.Request) {
+	trackID := r.Header.Get("trackID")
+	uid := r.Header.Get("uid")
+	rawJSON := r.Header.Get("trackPoints")
+
+	var parsed []models.TrackPoint
+	err := json.Unmarshal([]byte(rawJSON), &parsed)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "insertTrackPointPage",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	d, err := InsertTrackPoint(dbHandler.Ctx.App, trackID, uid, parsed)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "insertTrackPointPage",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Convert to JSON and prepare response
+	rd, err := json.Marshal(d)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "insertTrackPointPage",
 			Err:    err,
 		})
 

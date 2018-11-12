@@ -164,6 +164,29 @@ func TakeOwnership(app *firebase.App, trackID string, uid string) (own models.Ig
 	return
 }
 
+func InsertTrackPoint(app *firebase.App, trackID string, uid string, data []models.TrackPoint) (updated models.IgcMetadata, err error) {
+	client, ctx, err := getFirebaseClient(app)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "InsertTrackPoint", Err: err, Msg: "FirestoreClient"})
+		return
+	}
+
+	updated, err = getTrackMetadata(client, trackID, uid, ctx)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "InsertTrackPoint", Err: err, Msg: "Fail get metadata"})
+		return
+	}
+
+	updated.TrackPoints = data
+
+	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Set(ctx, updated)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "InsertTrackPoint", Err: err, Msg: "Fail set metadata"})
+	}
+
+	return
+}
+
 func getFirebaseClient(app *firebase.App) (client *firestore.Client, ctx context.Context, err error) {
 	ctx = context.Background()
 

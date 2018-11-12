@@ -32,6 +32,7 @@ func TestDbHandler(t *testing.T) {
 		"",
 		"",
 		"",
+		"",
 	}
 
 	t.Run("Insert", func(t *testing.T) {
@@ -119,6 +120,39 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 		t.Error("Privacy setting should be changed to true")
 	}
 	// updatePrivacy DONE
+
+	// Set up insertTrackPoint
+	// Set up the object to send in correct format
+	var trackPoints []models.TrackPoint
+	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
+	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
+	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
+	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
+	trackPointsJson, err := json.Marshal(trackPoints)
+	if err != nil {
+		t.Error("Error parsing JSON of insertTrackPoint")
+	}
+	var tempBuilder strings.Builder
+	tempBuilder.Write(trackPointsJson)
+	trackPointsString := tempBuilder.String()
+
+	// Set up the request
+	req = httptest.NewRequest("PUT", "/insertTrackPoint", nil)
+	req.Header.Set("token", token)
+	req.Header.Set("trackID", insertBody.TrackID)
+	req.Header.Set("trackPoints", trackPointsString)
+
+	// insertTrackPoint DONE
+	ret = testutils.TestRoute(req, r, "InsertTrackPoint", t, http.StatusOK)
+	var insertTracksPointBody models.IgcMetadata
+	err = json.Unmarshal(ret, &insertTracksPointBody)
+	if err != nil {
+		t.Error("Failed extracting metadata response of InsertTrackPoint")
+	}
+
+	if insertTracksPointBody.TrackPoints[0] != testutils.InsertTrackPointTestData {
+		t.Error("InsertTrackPoint insertion should be same as object that was sent")
+	}
 
 	// Set up getTracks
 	req = httptest.NewRequest("GET", "/getTracks", nil)

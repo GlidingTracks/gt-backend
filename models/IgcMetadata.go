@@ -10,4 +10,5 @@ type IgcMetadata struct {
 	UID     string
 	Record  gtbackend.Record
 	TrackID string
+	TrackPoints []TrackPoint
 }
