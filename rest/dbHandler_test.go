@@ -29,6 +29,7 @@ func TestDbHandler(t *testing.T) {
 		"",
 		"",
 		"",
+		"",
 	}
 
 	t.Run("Insert", func(t *testing.T) {
@@ -49,7 +50,8 @@ func TestDbHandler(t *testing.T) {
 func TestIntegratedDbHandlerTest(t *testing.T) {
 	app, token := testutils.RetrieveFirebaseIDToken()
 	values := map[string]io.Reader{
-		"file": mustOpen("../testdata/testIgc.igc"),
+		"file":    mustOpen("../testdata/testIgc.igc"),
+		"private": strings.NewReader("true"),
 	}
 
 	r := CompleteRouterSetup(app)
@@ -69,6 +71,28 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 		t.Error("Failed extracting metadata response of InsertTrack")
 	}
 	// insertTrack DONE
+
+	// Set up updatePrivacy
+	req = httptest.NewRequest("PUT", "/updatePrivacy", nil)
+	req.Header.Set("token", token)
+	req.Header.Set("trackID", insertBody.TrackID)
+	req.Header.Set("newSetting", "false")
+	if insertBody.Privacy != true {
+		t.Error("Privacy should be true before updating privacy to false")
+	}
+
+	// Run UpdatePrivacy
+	ret = testutils.TestRoute(req, r, "UpdatePrivacy", t, http.StatusOK)
+	var updatePrivacyBody models.IgcMetadata
+	err = json.Unmarshal(ret, &updatePrivacyBody)
+	if err != nil {
+		t.Error("Failed extracting metadata response of UpdatePrivacy")
+	}
+
+	if updatePrivacyBody.Privacy != false {
+		t.Error("Privacy setting should be changed to false")
+	}
+	// updatePrivacy DONE
 
 	// Set up getTracks
 	req = httptest.NewRequest("GET", "/getTracks", nil)

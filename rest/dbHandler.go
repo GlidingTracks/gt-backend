@@ -14,11 +14,12 @@ const fileNameDB = "dbHandler.go"
 
 // DbHandler holds the context and routes for this handler.
 type DbHandler struct {
-	Ctx         Context
-	InsertTrack string
-	GetTracks   string
-	GetTrack    string
-	DeleteTrack string
+	Ctx           Context
+	InsertTrack   string
+	GetTracks     string
+	GetTrack      string
+	DeleteTrack   string
+	UpdatePrivacy string
 }
 
 // Bind sets up the routes to the mux router.
@@ -27,6 +28,7 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 	r.HandleFunc(dbHandler.GetTracks, dbHandler.getTracksPage).Methods(constant.Get)
 	r.HandleFunc(dbHandler.GetTrack, dbHandler.getTrackPage).Methods(constant.Get)
 	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Methods(constant.Delete)
+	r.HandleFunc(dbHandler.UpdatePrivacy, dbHandler.updatePrivacyPage).Methods(constant.Put)
 }
 
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
@@ -135,6 +137,39 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 	}
 
 	w = prepareGeneralResponse(w, []byte(trackID), constant.TextPlain)
+	return
+}
+
+func (dbHandler DbHandler) updatePrivacyPage(w http.ResponseWriter, r *http.Request) {
+	trackID := r.Header.Get("trackID")
+	newSetting := gtbackend.GetBoolFromString(r.Header.Get("private"))
+	uid := r.Header.Get("uid")
+
+	d, err := UpdatePrivacy(dbHandler.Ctx.App, trackID, uid, newSetting)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "updatePrivacyPage",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Convert to JSON and prepare response
+	rd, err := json.Marshal(d)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "updatePrivacyPage",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
 	return
 }
 

@@ -49,3 +49,34 @@ func TestGetTrack(t *testing.T) {
 		t.Error("Did not receive any data, should receive data", err)
 	}
 }
+
+func TestUpdatePrivacy(t *testing.T) {
+	app := testutils.InitializeFirebaseTest()
+
+	testUID := "o1Sz791YSHby0PCe51JlxSD6G533"
+	trackID := "scf6Xw4pwCKGeLjrVJHo"
+
+	// Test setting privacy to TRUE
+	data, err := UpdatePrivacy(app, trackID, testUID, true)
+	if err != nil {
+		t.Error("UpdatePrivacy failed updating setting")
+	}
+	if data.Privacy != true {
+		t.Error("Privacy should be TRUE")
+	}
+
+	// Test setting privacy to FALSE
+	data, err = UpdatePrivacy(app, trackID, testUID, false)
+	if err != nil {
+		t.Error("UpdatePrivacy failed updating setting")
+	}
+	if data.Privacy != false {
+		t.Error("Privacy should be FALSE")
+	}
+
+	// Test setting with wrong UID, should fail
+	data, err = UpdatePrivacy(app, trackID, "TotallyLegitUID", false)
+	if err == nil {
+		t.Error("This should actually have an error")
+	}
+}

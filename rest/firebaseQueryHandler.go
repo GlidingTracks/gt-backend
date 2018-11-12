@@ -120,6 +120,73 @@ func DeleteTrack(app *firebase.App, trackID string) (httpCode int, err error) {
 	return
 }
 
+func UpdatePrivacy(app *firebase.App, trackID string, uid string, newSetting bool) (updated models.IgcMetadata, err error) {
+	client, ctx, err := getFirebaseClient(app)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "UpdatePrivacy", Err: err, Msg: "FirestoreClient"})
+		return
+	}
+
+	updated, err = getTrackMetadata(client, trackID, uid, ctx)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "UpdatePrivacy", Err: err, Msg: "Fail get metadata"})
+		return
+	}
+
+	updated.Privacy = newSetting
+	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Set(ctx, updated)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "UpdatePrivacy", Err: err, Msg: "Fail set metadata"})
+	}
+
+	return
+}
+
+func getFirebaseClient(app *firebase.App) (client *firestore.Client, ctx context.Context, err error) {
+	ctx = context.Background()
+
+	client, err = app.Firestore(ctx)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getFirebaseClient", Err: err, Msg: "FirestoreClient"})
+	}
+	return
+}
+
+func getTrackMetadata(client *firestore.Client, trackID string, uid string, ctx context.Context) (data models.IgcMetadata, err error) {
+	doc, err := client.Collection(constant.IgcMetadata).Doc(trackID).Get(ctx)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getTrackMetadata", Err: err, Msg: "FirestoreClient"})
+		return
+	}
+
+	d, err := documentToModel(doc)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getTrackMetadata", Err: err, Msg: "FirestoreClient"})
+		return
+	}
+
+	if d.UID != uid {
+		err = errors.New(constant.ErrorForbidden)
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getTrackMetadata", Err: err, Msg: "FirestoreClient"})
+		return
+	}
+
+	data = d
+
+	return
+}
+
+func documentToModel(doc *firestore.DocumentSnapshot) (data models.IgcMetadata, err error) {
+	// Convert doc to our model
+	err = doc.DataTo(&data)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "processIterGetTracks", Err: err})
+
+		return data, err
+	}
+	return
+}
+
 /** processIterGetTracks
 Processes the request made to Firebase based
 iter *firestore.DocumentIterator Iterator with the results from firestore
@@ -140,9 +207,7 @@ func processIterGetTracks(iter *firestore.DocumentIterator, filterUID string) (d
 			return data, err
 		}
 
-		// Convert doc to our model
-		var d models.IgcMetadata
-		err = doc.DataTo(&d)
+		d, err := documentToModel(doc)
 		if err != nil {
 			gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "processIterGetTracks", Err: err})
 
