@@ -124,10 +124,10 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	// Set up insertTrackPoint
 	// Set up the object to send in correct format
 	var trackPoints []models.TrackPoint
-	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
-	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
-	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
-	trackPoints = append(trackPoints, testutils.InsertTrackPointTestData)
+	trackPoints = append(trackPoints, InsertTrackPointTestData)
+	trackPoints = append(trackPoints, InsertTrackPointTestData)
+	trackPoints = append(trackPoints, InsertTrackPointTestData)
+	trackPoints = append(trackPoints, InsertTrackPointTestData)
 	trackPointsJson, err := json.Marshal(trackPoints)
 	if err != nil {
 		t.Error("Error parsing JSON of insertTrackPoint")
@@ -150,7 +150,7 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 		t.Error("Failed extracting metadata response of InsertTrackPoint")
 	}
 
-	if insertTracksPointBody.TrackPoints[0] != testutils.InsertTrackPointTestData {
+	if insertTracksPointBody.TrackPoints[0] != InsertTrackPointTestData {
 		t.Error("InsertTrackPoint insertion should be same as object that was sent")
 	}
 
@@ -216,4 +216,15 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	if parsedDeleteTrackBody != insertBody.TrackID {
 		t.Error("Failed DeleteTrack body read")
 	}
+}
+
+var InsertTrackPointTestData = models.TrackPoint{
+	Time:         2,
+	Latitude:     5.0,
+	Longitude:    5.5,
+	Valid:        false,
+	Pressure_alt: 5,
+	GPS_alt:      5,
+	Accuracy:     5.0,
+	Engine_RPM:   5.0,
 }

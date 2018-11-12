@@ -86,16 +86,16 @@ func TestInsertTrackPoint(t *testing.T) {
 
 	trackID := "scf6Xw4pwCKGeLjrVJHo"
 	var testTrackPointArray []models.TrackPoint
-	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
-	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
-	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
-	testTrackPointArray = append(testTrackPointArray, testutils.InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
 
 	data, err := InsertTrackPoint(app, trackID, constant.TestUID, testTrackPointArray)
 	if err != nil {
 		t.Error("InsertTrackPoint failed uploading track points")
 	}
-	if data.TrackPoints[0] != testutils.InsertTrackPointTestData {
+	if data.TrackPoints[0] != InsertTrackPointTestData {
 		t.Error("InsertTrackPoint insertion should be same as object that was sent")
 	}
 }
