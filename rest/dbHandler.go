@@ -20,6 +20,7 @@ type DbHandler struct {
 	GetTrack      string
 	DeleteTrack   string
 	UpdatePrivacy string
+	TakeOwnership string
 }
 
 // Bind sets up the routes to the mux router.
@@ -29,6 +30,7 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 	r.HandleFunc(dbHandler.GetTrack, dbHandler.getTrackPage).Methods(constant.Get)
 	r.HandleFunc(dbHandler.DeleteTrack, dbHandler.deleteTrackPage).Methods(constant.Delete)
 	r.HandleFunc(dbHandler.UpdatePrivacy, dbHandler.updatePrivacyPage).Methods(constant.Put)
+	r.HandleFunc(dbHandler.TakeOwnership, dbHandler.takeOwnershipPage).Methods(constant.Put)
 }
 
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
@@ -146,6 +148,38 @@ func (dbHandler DbHandler) updatePrivacyPage(w http.ResponseWriter, r *http.Requ
 	uid := r.Header.Get("uid")
 
 	d, err := UpdatePrivacy(dbHandler.Ctx.App, trackID, uid, newSetting)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "updatePrivacyPage",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Convert to JSON and prepare response
+	rd, err := json.Marshal(d)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{
+			Origin: fileNameDB,
+			Method: "updatePrivacyPage",
+			Err:    err,
+		})
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
+	return
+}
+
+func (dbHandler DbHandler) takeOwnershipPage(w http.ResponseWriter, r *http.Request) {
+	trackID := r.Header.Get("trackID")
+	uid := r.Header.Get("uid")
+
+	d, err := TakeOwnership(dbHandler.Ctx.App, trackID, uid)
 	if err != nil {
 		gtbackend.DebugLog(gtbackend.InternalLog{
 			Origin: fileNameDB,

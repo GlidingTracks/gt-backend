@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/testutils"
 	"github.com/Sirupsen/logrus"
 	"io"
@@ -40,7 +41,7 @@ func TestProcessUpload(t *testing.T) {
 	}
 
 	req, err := createMultipart(values, "/upload", "POST")
-	req.Header.Set("uid", "123")
+	req.Header.Set("uid", constant.ScraperUID)
 	if err != nil {
 		t.Error("Could not create multipart")
 	}
@@ -48,6 +49,11 @@ func TestProcessUpload(t *testing.T) {
 	code, md, err := ProcessUploadRequest(app, req)
 	if err != nil && code != 200 {
 		t.Error("Could not save file, should pass", err)
+	}
+
+	md, err = TakeOwnership(app, md.TrackID, constant.TestUID)
+	if err != nil && md.UID != constant.TestUID {
+		t.Error("UID of returned object should be TestUID", err)
 	}
 
 	code, err = DeleteTrack(app, md.TrackID)

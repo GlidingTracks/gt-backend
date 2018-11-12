@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/testutils"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,9 @@ import (
 
 // Testing that the start page, or well any path not defined in the backend returns properly
 func TestStartPage(t *testing.T) {
-	app, token := testutils.RetrieveFirebaseIDToken()
+	app := testutils.InitializeFirebaseTest()
+	token := testutils.RetrieveFirebaseIDToken(app, constant.TestUID)
+
 	r := CompleteRouterSetup(app)
 
 	// Test root path

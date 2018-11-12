@@ -1,6 +1,7 @@
 package gtbackend
 
 import (
+	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/testutils"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -9,7 +10,8 @@ import (
 )
 
 func TestSecurityMiddleware_CheckIncomingRequests(t *testing.T) {
-	app, token := testutils.RetrieveFirebaseIDTokenCredFile(false)
+	app := testutils.InitializeFirebaseTestCredFile(false)
+	token := testutils.RetrieveFirebaseIDToken(app, constant.TestUID)
 
 	sec := SecurityMiddleware{App: app}
 

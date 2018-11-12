@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/GlidingTracks/gt-backend/testutils"
 	"testing"
@@ -53,11 +54,10 @@ func TestGetTrack(t *testing.T) {
 func TestUpdatePrivacy(t *testing.T) {
 	app := testutils.InitializeFirebaseTest()
 
-	testUID := "o1Sz791YSHby0PCe51JlxSD6G533"
 	trackID := "scf6Xw4pwCKGeLjrVJHo"
 
 	// Test setting privacy to TRUE
-	data, err := UpdatePrivacy(app, trackID, testUID, true)
+	data, err := UpdatePrivacy(app, trackID, constant.TestUID, true)
 	if err != nil {
 		t.Error("UpdatePrivacy failed updating setting")
 	}
@@ -66,7 +66,7 @@ func TestUpdatePrivacy(t *testing.T) {
 	}
 
 	// Test setting privacy to FALSE
-	data, err = UpdatePrivacy(app, trackID, testUID, false)
+	data, err = UpdatePrivacy(app, trackID, constant.TestUID, false)
 	if err != nil {
 		t.Error("UpdatePrivacy failed updating setting")
 	}
@@ -80,3 +80,6 @@ func TestUpdatePrivacy(t *testing.T) {
 		t.Error("This should actually have an error")
 	}
 }
+
+// DeleteTrack method tested in fileUploadHandler_test
+// TakeOwnership method tested in fileUploadHandler_test

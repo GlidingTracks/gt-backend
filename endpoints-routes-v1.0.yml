@@ -124,11 +124,31 @@
       required: true
     - name: trackID
       type: string
-      description: Track ID to get
+      description: Track ID to modify
       required: true
     - name: private
       type: string
       description: true/false
+      required: true
+    response:
+    - code: 200
+      description: Privacy updated successfully
+      content-type: text/plain
+    - code: 400
+      description: bad request, cannot handle the request
+      content-type: application/json
+
+/takeOwnership:
+  method: PUT
+    summary: Takes ownership of a trackID that was uploaded by the scraper
+    params:
+    - name: token
+      type: string
+      description: IDToken provided by Firebase Auth
+      required: true
+    - name: trackID
+      type: string
+      description: Track ID to take ownership of
       required: true
     response:
     - code: 200

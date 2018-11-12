@@ -142,6 +142,28 @@ func UpdatePrivacy(app *firebase.App, trackID string, uid string, newSetting boo
 	return
 }
 
+func TakeOwnership(app *firebase.App, trackID string, uid string) (own models.IgcMetadata, err error) {
+	client, ctx, err := getFirebaseClient(app)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "TakeOwnership", Err: err, Msg: "FirestoreClient"})
+		return
+	}
+
+	own, err = getTrackMetadata(client, trackID, constant.ScraperUID, ctx)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "TakeOwnership", Err: err, Msg: "Fail get metadata"})
+		return
+	}
+
+	own.UID = uid
+	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Set(ctx, own)
+	if err != nil {
+		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "TakeOwnership", Err: err, Msg: "Fail set metadata"})
+	}
+
+	return
+}
+
 func getFirebaseClient(app *firebase.App) (client *firestore.Client, ctx context.Context, err error) {
 	ctx = context.Background()
 

@@ -28,6 +28,7 @@ func CompleteRouterSetup(app *firebase.App) (handler http.Handler) {
 		GetTrack:      "/getTrack",
 		DeleteTrack:   "/deleteTrack",
 		UpdatePrivacy: "/updatePrivacy",
+		TakeOwnership: "/takeOwnership",
 	}
 
 	dbRoutes.Bind(r)

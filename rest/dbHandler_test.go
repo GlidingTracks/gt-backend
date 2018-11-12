@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/GlidingTracks/gt-backend/testutils"
 	"github.com/gorilla/mux"
@@ -30,6 +31,7 @@ func TestDbHandler(t *testing.T) {
 		"",
 		"",
 		"",
+		"",
 	}
 
 	t.Run("Insert", func(t *testing.T) {
@@ -48,10 +50,12 @@ func TestDbHandler(t *testing.T) {
 // E2E test of all functions in DbHandler executed in following order:
 // InsertTrack -> GetTracks -> GetTrack -> DeleteTrack
 func TestIntegratedDbHandlerTest(t *testing.T) {
-	app, token := testutils.RetrieveFirebaseIDToken()
+	app := testutils.InitializeFirebaseTest()
+	scraperToken := testutils.RetrieveFirebaseIDToken(app, constant.ScraperUID)
+	token := testutils.RetrieveFirebaseIDToken(app, constant.TestUID)
 	values := map[string]io.Reader{
 		"file":    mustOpen("../testdata/testIgc.igc"),
-		"private": strings.NewReader("true"),
+		"private": strings.NewReader("false"),
 	}
 
 	r := CompleteRouterSetup(app)
@@ -61,7 +65,7 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	if err != nil {
 		t.Error("Could not create multipart")
 	}
-	req.Header.Set("token", token)
+	req.Header.Set("token", scraperToken)
 
 	// Run insertTrack
 	ret := testutils.TestRoute(req, r, "InsertTrack", t, http.StatusOK)
@@ -72,13 +76,35 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	}
 	// insertTrack DONE
 
+	// Set up takeOwnership
+	req = httptest.NewRequest("PUT", "/takeOwnership", nil)
+	req.Header.Set("token", token)
+	req.Header.Set("trackID", insertBody.TrackID)
+	if insertBody.UID != constant.ScraperUID {
+		t.Error("Track should be owned by the scraper before taking ownership")
+	}
+
+	// Run TakeOwnership
+	ret = testutils.TestRoute(req, r, "TakeOwnership", t, http.StatusOK)
+	var takeOwnershipBody models.IgcMetadata
+	err = json.Unmarshal(ret, &takeOwnershipBody)
+	if err != nil {
+		t.Error("Failed extracting metadata response of TakeOwnership")
+	}
+
+	if takeOwnershipBody.UID != constant.TestUID {
+		t.Error("Track should now be owned by the TestUID")
+	}
+
+	// takeOwnership DONE
+
 	// Set up updatePrivacy
 	req = httptest.NewRequest("PUT", "/updatePrivacy", nil)
 	req.Header.Set("token", token)
 	req.Header.Set("trackID", insertBody.TrackID)
-	req.Header.Set("newSetting", "false")
-	if insertBody.Privacy != true {
-		t.Error("Privacy should be true before updating privacy to false")
+	req.Header.Set("private", "true")
+	if insertBody.Privacy != false {
+		t.Error("Privacy should be false before updating privacy to true")
 	}
 
 	// Run UpdatePrivacy
@@ -89,8 +115,8 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 		t.Error("Failed extracting metadata response of UpdatePrivacy")
 	}
 
-	if updatePrivacyBody.Privacy != false {
-		t.Error("Privacy setting should be changed to false")
+	if updatePrivacyBody.Privacy != true {
+		t.Error("Privacy setting should be changed to true")
 	}
 	// updatePrivacy DONE
 
