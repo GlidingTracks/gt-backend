@@ -86,18 +86,33 @@ func TestInsertTrackPoint(t *testing.T) {
 
 	trackID := "scf6Xw4pwCKGeLjrVJHo"
 	var testTrackPointArray []models.TrackPoint
-	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
-	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
-	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
-	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData1)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData2)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData3)
+	testTrackPointArray = append(testTrackPointArray, InsertTrackPointTestData4)
 
 	data, err := InsertTrackPoint(app, trackID, constant.TestUID, testTrackPointArray)
 	if err != nil {
-		t.Error("InsertTrackPoint failed uploading track points")
+		t.Error("InsertTrackPoint failed uploading track points on TestUID")
 	}
-	if data.TrackPoints[0] != InsertTrackPointTestData {
-		t.Error("InsertTrackPoint insertion should be same as object that was sent")
+	if data.TrackPoints[0] != InsertTrackPointTestData1 {
+		t.Error("InsertTrackPoint Object 0 should match object order of appending")
 	}
+	if data.TrackPoints[1] != InsertTrackPointTestData2 {
+		t.Error("InsertTrackPoint Object 1 should match object order of appending")
+	}
+	if data.TrackPoints[2] != InsertTrackPointTestData3 {
+		t.Error("InsertTrackPoint Object 2 should match object order of appending")
+	}
+	if data.TrackPoints[3] != InsertTrackPointTestData4 {
+		t.Error("InsertTrackPoint Object 3 should match object order of appending")
+	}
+
+	data, err = InsertTrackPoint(app, trackID, "DummyID", testTrackPointArray)
+	if err != nil {
+		t.Error("InsertTrackPoint failed uploading track points on dummy ID")
+	}
+
 }
 
 // DeleteTrack method tested in fileUploadHandler_test

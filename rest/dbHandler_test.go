@@ -124,10 +124,10 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	// Set up insertTrackPoint
 	// Set up the object to send in correct format
 	var trackPoints []models.TrackPoint
-	trackPoints = append(trackPoints, InsertTrackPointTestData)
-	trackPoints = append(trackPoints, InsertTrackPointTestData)
-	trackPoints = append(trackPoints, InsertTrackPointTestData)
-	trackPoints = append(trackPoints, InsertTrackPointTestData)
+	trackPoints = append(trackPoints, InsertTrackPointTestData1)
+	trackPoints = append(trackPoints, InsertTrackPointTestData2)
+	trackPoints = append(trackPoints, InsertTrackPointTestData3)
+	trackPoints = append(trackPoints, InsertTrackPointTestData4)
 	trackPointsJson, err := json.Marshal(trackPoints)
 	if err != nil {
 		t.Error("Error parsing JSON of insertTrackPoint")
@@ -150,8 +150,17 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 		t.Error("Failed extracting metadata response of InsertTrackPoint")
 	}
 
-	if insertTracksPointBody.TrackPoints[0] != InsertTrackPointTestData {
-		t.Error("InsertTrackPoint insertion should be same as object that was sent")
+	if insertTracksPointBody.TrackPoints[0] != InsertTrackPointTestData1 {
+		t.Error("InsertTrackPoint Object 0 should match object order of appending")
+	}
+	if insertTracksPointBody.TrackPoints[1] != InsertTrackPointTestData2 {
+		t.Error("InsertTrackPoint Object 1 should match object order of appending")
+	}
+	if insertTracksPointBody.TrackPoints[2] != InsertTrackPointTestData3 {
+		t.Error("InsertTrackPoint Object 2 should match object order of appending")
+	}
+	if insertTracksPointBody.TrackPoints[3] != InsertTrackPointTestData4 {
+		t.Error("InsertTrackPoint Object 3 should match object order of appending")
 	}
 
 	// Set up getTracks
@@ -218,13 +227,47 @@ func TestIntegratedDbHandlerTest(t *testing.T) {
 	}
 }
 
-var InsertTrackPointTestData = models.TrackPoint{
-	Time:         2,
-	Latitude:     5.0,
-	Longitude:    5.5,
-	Valid:        false,
-	Pressure_alt: 5,
-	GPS_alt:      5,
-	Accuracy:     5.0,
-	Engine_RPM:   5.0,
+// Following are 4 TrackPoints used in the testing of REST, taken from the frontend
+var InsertTrackPointTestData1 = models.TrackPoint{
+	Time:         1535960184000,
+	Latitude:     43.263616666666664,
+	Longitude:    27.2839,
+	Valid:        true,
+	Pressure_alt: 0,
+	GPS_alt:      324,
+	Accuracy:     80,
+	Engine_RPM:   -1,
+}
+
+var InsertTrackPointTestData2 = models.TrackPoint{
+	Time:         1535963730000,
+	Latitude:     43.1516,
+	Longitude:    27.025466666666667,
+	Valid:        true,
+	Pressure_alt: 0,
+	GPS_alt:      1890,
+	Accuracy:     2,
+	Engine_RPM:   -1,
+}
+
+var InsertTrackPointTestData3 = models.TrackPoint{
+	Time:         1535966894000,
+	Latitude:     42.897416666666665,
+	Longitude:    26.935166666666667,
+	Valid:        true,
+	Pressure_alt: 0,
+	GPS_alt:      1251,
+	Accuracy:     88,
+	Engine_RPM:   -1,
+}
+
+var InsertTrackPointTestData4 = models.TrackPoint{
+	Time:         1535969598000,
+	Latitude:     42.752716666666664,
+	Longitude:    26.70725,
+	Valid:        true,
+	Pressure_alt: 0,
+	GPS_alt:      195,
+	Accuracy:     20,
+	Engine_RPM:   -1,
 }
