@@ -26,19 +26,16 @@ func (sec *SecurityMiddleware) CheckIncomingRequests(next http.Handler) http.Han
 }
 
 func checkIncomingRequests(r *http.Request, app *firebase.App) bool {
-	if checkIfInsecureRequest(r.RequestURI) {
-		return true
-	}
-
+	log := DebugLogPrepareHeader(fileNameSC, "checkIncomingRequests")
 	client, err := app.Auth(context.Background())
 	if err != nil {
-		DebugLog(InternalLog{Origin: fileNameSC, Method: "checkIncomingRequests", Err: err, Msg: "Cannot connect to Auth client"})
+		DebugLogErrMsg(log, err, "Cannot connect to Auth client")
 		return false
 	}
 
 	token, err := client.VerifyIDToken(context.Background(), r.Header.Get("token"))
 	if err != nil {
-		DebugLog(InternalLog{Origin: fileNameSC, Method: "checkIncomingRequests", Err: err, Msg: "Failed to authenticate user"})
+		DebugLogErrMsg(log, err, "Failed to authenticate user")
 		return false
 	}
 
@@ -46,18 +43,4 @@ func checkIncomingRequests(r *http.Request, app *firebase.App) bool {
 	r.Header.Set("uid", token.UID)
 
 	return true
-}
-
-// checkIfInsecureRequest - Checks if the request does not require token security check
-// Using struct as it appears to be the fastest on small number of strings
-func checkIfInsecureRequest(request string) bool {
-	switch request {
-	case
-		"/createUser",
-		"/updateUser",
-		"/deleteUser",
-		"/getUser":
-		return true
-	}
-	return false
 }

@@ -45,9 +45,14 @@ func TestGetTracks(t *testing.T) {
 func TestGetTrack(t *testing.T) {
 	app := testutils.InitializeFirebaseTest()
 
-	data, err := GetTrack(app, "HAGOdywD9rQayoOOIHyd")
+	data, err := GetTrack(app, "HAGOdywD9rQayoOOIHyd", "123")
 	if err != nil && len(data) < 1 {
 		t.Error("Did not receive any data, should receive data", err)
+	}
+
+	_, err = GetTrack(app, "HAGOdywD9rQayoOOIHyd", "456")
+	if err == nil {
+		t.Error("Getting with wrong UID should throw error!", err)
 	}
 }
 

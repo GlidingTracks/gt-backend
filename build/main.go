@@ -12,31 +12,30 @@ import (
 	"os"
 )
 
+const filename = "main.go"
+
 // main is the first entry-point in application.
 func main() {
+	log := gtbackend.DebugLogPrepareHeader(filename, "main")
 	app, err := initializeFirebase()
 	if err != nil {
-		gtbackend.LogFatal(gtbackend.InternalLog{
-			Err: err,
-		})
+		gtbackend.LogFatalErrNoMsg(log, err)
 	}
 
 	rCors := rest.CompleteRouterSetup(app)
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		gtbackend.LogFatal(gtbackend.InternalLog{
-			Msg: "$PORT must be set",
-		})
+		gtbackend.LogFatalNoErrMsg(log, "$PORT must be set")
 	}
 
-	gtbackend.LogFatal(gtbackend.InternalLog{
-		Err: http.ListenAndServe(":"+port, rCors),
-	})
+	err = http.ListenAndServe(":"+port, rCors)
+	gtbackend.LogFatalErrNoMsg(log, err)
 }
 
 // initializeFirebase gets a App object from Firebase, based on the service account credentials.
 func initializeFirebase() (app *firebase.App, err error) {
+	log := gtbackend.DebugLogPrepareHeader(filename, "initializeFirebase")
 	if !checkIfFirebaseCredentialsExist() {
 		if !tryCreateFirebaseCredsFromEnv() {
 			err = errors.New("could not connect to DB")
@@ -51,10 +50,7 @@ func initializeFirebase() (app *firebase.App, err error) {
 
 	app, err = firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
-		gtbackend.LogFatal(gtbackend.InternalLog{
-			Msg: "error initializing app",
-			Err: err,
-		})
+		gtbackend.LogFatalErrMsg(log, err, "error initializing app")
 	}
 
 	return

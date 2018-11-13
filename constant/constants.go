@@ -11,9 +11,6 @@ const GoogleCredEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
 // FirebaseStorageBucket url
 const FirebaseStorageBucket = "gt-backend-8b9c2.appspot.com"
 
-// CollectionTracks - Name of collection containing tracks in firestore.
-const CollectionTracks = "tracks"
-
 // IgcMetadata - Name of the collection containing igc metadata in firestore
 const IgcMetadata = "igc-metadata"
 

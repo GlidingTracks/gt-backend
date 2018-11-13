@@ -6,11 +6,10 @@ import (
 	"github.com/GlidingTracks/gt-backend/constant"
 	"github.com/GlidingTracks/gt-backend/models"
 	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
 	"net/http"
 )
 
-const fileNameDB = "dbHandler.go"
+const filenameDBH = "dbHandler.go"
 
 // DbHandler holds the context and routes for this handler.
 type DbHandler struct {
@@ -38,48 +37,31 @@ func (dbHandler DbHandler) Bind(r *mux.Router) {
 // insertTrackRecordPage takes care of the overall logic of getting the request file saved
 // and inserted into the DB.
 func (dbHandler DbHandler) insertTrackRecordPage(w http.ResponseWriter, r *http.Request) {
-	c, md, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "insertTrackRecordPage")
+	c, d, err := ProcessUploadRequest(dbHandler.Ctx.App, r)
 	if err != nil {
+		gtbackend.DebugLogErrNoMsg(log, err)
 		http.Error(w, err.Error(), c)
 		return
 	}
 
-	// Convert to JSON and prepare response
-	d, err := json.Marshal(md)
-	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "insertTrack",
-			Err:    err,
-		})
-
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	w = prepareGeneralResponse(w, d, constant.ApplicationJSON)
+	w = prepareMetadataSingleResponse(w, d, constant.ApplicationJSON)
 	return
 }
 
 // getTracksPage retrieves a page of track metadata for the user
 func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request) {
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "getTracksPage")
 	// Extract data from header
 	uID := r.Header.Get("uid")
 	tmsk := r.Header.Get("timeSkip")
 	qt := r.Header.Get("queryType")
 	ordDir := r.Header.Get("orderDirection")
 
-	if uID == "" {
-		http.Error(w, errors.New("No uId supplied").Error(), http.StatusBadRequest)
-	}
-
 	// Process request
 	d, err := GetTracks(dbHandler.Ctx.App, models.NewFirebaseQuery(uID, tmsk, qt, ordDir))
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "getTracksPage",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -88,11 +70,7 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 	// Convert to JSON and prepare response
 	rd, err := json.Marshal(d)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "getTracks",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -103,16 +81,14 @@ func (dbHandler DbHandler) getTracksPage(w http.ResponseWriter, r *http.Request)
 
 // getTrackPage Gets the track from the Firebase Storage based on TrackID
 func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) {
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "getTrackPage")
 	trackID := r.Header.Get("trackID")
+	uid := r.Header.Get("uid")
 
 	// Process request
-	d, err := GetTrack(dbHandler.Ctx.App, trackID)
+	d, err := GetTrack(dbHandler.Ctx.App, trackID, uid)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "getTrack",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -125,16 +101,14 @@ func (dbHandler DbHandler) getTrackPage(w http.ResponseWriter, r *http.Request) 
 
 // deleteTrackPage Deletes track from Storage and Firestore Database based on TrackID
 func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Request) {
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "deleteTrackPage")
 	trackID := r.Header.Get("trackID")
+	uid := r.Header.Get("uid")
 
 	// Process request
-	c, err := DeleteTrack(dbHandler.Ctx.App, trackID)
+	c, err := DeleteTrack(dbHandler.Ctx.App, trackID, uid)
 	if err != nil || c != http.StatusOK {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "deleteTrackPage",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -144,84 +118,55 @@ func (dbHandler DbHandler) deleteTrackPage(w http.ResponseWriter, r *http.Reques
 	return
 }
 
+// updatePrivacyPage Changes the Private variable to a new variable
 func (dbHandler DbHandler) updatePrivacyPage(w http.ResponseWriter, r *http.Request) {
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "updatePrivacyPage")
 	trackID := r.Header.Get("trackID")
 	newSetting := gtbackend.GetBoolFromString(r.Header.Get("private"))
 	uid := r.Header.Get("uid")
 
 	d, err := UpdatePrivacy(dbHandler.Ctx.App, trackID, uid, newSetting)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "updatePrivacyPage",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Convert to JSON and prepare response
-	rd, err := json.Marshal(d)
-	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "updatePrivacyPage",
-			Err:    err,
-		})
-
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
+	w = prepareMetadataSingleResponse(w, d, constant.ApplicationJSON)
 	return
 }
 
+// takeOwnershipPage Sets the UID of tracks to this UID if it's the scraper's UID that is taken from
 func (dbHandler DbHandler) takeOwnershipPage(w http.ResponseWriter, r *http.Request) {
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "takeOwnershipPage")
 	trackID := r.Header.Get("trackID")
 	uid := r.Header.Get("uid")
 
 	d, err := TakeOwnership(dbHandler.Ctx.App, trackID, uid)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "takeOwnershipPage",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Convert to JSON and prepare response
-	rd, err := json.Marshal(d)
-	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "takeOwnershipPage",
-			Err:    err,
-		})
-
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
+	w = prepareMetadataSingleResponse(w, d, constant.ApplicationJSON)
 	return
 }
 
+// insertTrackPointPage Inserts TrackPoint data for caching in the database
 func (dbHandler DbHandler) insertTrackPointPage(w http.ResponseWriter, r *http.Request) {
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "insertTrackPointPage")
 	trackID := r.Header.Get("trackID")
 	uid := r.Header.Get("uid")
 	rawJSON := r.Header.Get("trackPoints")
 
+	// Parse into objects the string JSON from header
 	var parsed []models.TrackPoint
 	err := json.Unmarshal([]byte(rawJSON), &parsed)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "insertTrackPointPage",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -229,38 +174,39 @@ func (dbHandler DbHandler) insertTrackPointPage(w http.ResponseWriter, r *http.R
 
 	d, err := InsertTrackPoint(dbHandler.Ctx.App, trackID, uid, parsed)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "insertTrackPointPage",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Convert to JSON and prepare response
-	rd, err := json.Marshal(d)
-	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: fileNameDB,
-			Method: "insertTrackPointPage",
-			Err:    err,
-		})
-
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	w = prepareGeneralResponse(w, rd, constant.ApplicationJSON)
+	w = prepareMetadataSingleResponse(w, d, constant.ApplicationJSON)
 	return
 }
 
-// Prepares a general response to send back to the client, setting various common variables in the ResponseWriter
+// prepareGeneralResponse Prepares a general response to send back to the client, setting various common variables in the ResponseWriter
 func prepareGeneralResponse(unPrepW http.ResponseWriter, rawData []byte, contentType string) (prepW http.ResponseWriter) {
 	prepW = unPrepW
 
 	prepW.Header().Set(constant.ContentType, contentType)
 	prepW.WriteHeader(http.StatusOK)
 	prepW.Write(rawData)
+	return
+}
+
+// prepareMetadataSingleResponse Prepares a metadata with a single IgcMetadata object response
+func prepareMetadataSingleResponse(unPrepW http.ResponseWriter, data models.IgcMetadata, contentType string) (prepW http.ResponseWriter) {
+	log := gtbackend.DebugLogPrepareHeader(filenameDBH, "prepareMetadataSingleResponse")
+	prepW = unPrepW
+
+	d, err := json.Marshal(data)
+	if err != nil {
+		gtbackend.DebugLogErrNoMsg(log, err)
+
+		http.Error(prepW, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	prepW = prepareGeneralResponse(prepW, d, contentType)
 	return
 }

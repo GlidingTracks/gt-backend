@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var testInternalLog = InternalLog{
+var testInternalLog = internalLog{
 	"test",
 	"test",
 	errors.New("test"),
@@ -84,7 +84,11 @@ func TestDebugLog(t *testing.T) {
 		testPath,
 	})
 
-	DebugLog(testInternalLog)
+	testInternalLogHeader := DebugLogPrepareHeader("test", "test")
+	err := errors.New("test")
+	DebugLogErrNoMsg(testInternalLogHeader, err)
+	DebugLogErrMsg(testInternalLogHeader, err, "test")
+	DebugLogNoErrMsg(testInternalLogHeader, "test")
 
 	if !exists(LogPath) {
 		t.Fatal("No log directory created")

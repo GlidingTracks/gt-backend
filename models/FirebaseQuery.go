@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const filenameFQ = "FirebaseQuery.go"
+const filename = "FirebaseQuery.go"
 
 // FirebaseQuery - struct denoting a Firebase query to receive data.
 // UID string User ID as string
@@ -24,6 +24,7 @@ type FirebaseQuery struct {
 // NewFirebaseQuery - Initializes the query with values from strings (from header),
 // sets TmSk = 1 and OrdDir = Asc as default.
 func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
+	log := gtbackend.DebugLogPrepareHeader(filename, "NewFirebaseQuery")
 	odfd := firestore.Asc
 	if od == "Desc" {
 		odfd = firestore.Desc
@@ -46,11 +47,7 @@ func NewFirebaseQuery(u string, t string, q string, od string) FirebaseQuery {
 			skipint = intsets.MinInt
 		}
 
-		gtbackend.DebugLog(gtbackend.InternalLog{
-			Origin: filenameFQ,
-			Method: "getTracksPage",
-			Err:    err,
-		})
+		gtbackend.DebugLogErrNoMsg(log, err)
 	}
 
 	return FirebaseQuery{u, skipint, q, odfd}

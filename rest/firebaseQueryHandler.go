@@ -13,11 +13,12 @@ import (
 	"net/http"
 )
 
-// fileNameFQH filename
+// fileNameFQH filenameDBH
 const fileNameFQH = "firebaseQueryHandler.go"
 
 // GetTracks gets a list of IgcMetadata from Firebase based on query
 func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.IgcMetadata, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "GetTracks")
 	ctx := context.Background()
 
 	if app == nil {
@@ -27,7 +28,7 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 
 	client, err := app.Firestore(ctx)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getTracks", Err: err})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return
 	}
@@ -51,17 +52,27 @@ func GetTracks(app *firebase.App, query models.FirebaseQuery) (data []models.Igc
 }
 
 // GetTrack gets a track file from the Firebase Storage based on TrackID in metadata
-func GetTrack(app *firebase.App, trackID string) (data []byte, err error) {
+func GetTrack(app *firebase.App, trackID string, uid string) (data []byte, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "GetTrack")
+
+	// Verify that the user can download the file and abort if not
+	_, d, err := getTrackMetadata(app, trackID, uid, false)
+	if d.Privacy == true && d.UID != uid {
+		err = errors.New(constant.ErrorForbidden)
+		gtbackend.DebugLogErrNoMsg(log, err)
+		return
+	}
+
 	client, err := app.Storage(context.Background())
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "GetTrack", Err: err})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return
 	}
 
 	bucket, err := client.DefaultBucket()
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "GetTrack", Err: err})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return
 	}
@@ -75,43 +86,44 @@ func GetTrack(app *firebase.App, trackID string) (data []byte, err error) {
 }
 
 // DeleteTrack deletes the track from storage and firestore
-func DeleteTrack(app *firebase.App, trackID string) (httpCode int, err error) {
+func DeleteTrack(app *firebase.App, trackID string, uid string) (httpCode int, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "DeleteTrack")
 	ctx := context.Background()
 	httpCode = http.StatusBadRequest // Return before OK means failure
+
+	// Verify that the user actually can delete this track
+	client, _, err := getTrackMetadata(app, trackID, uid, true)
+	if err != nil {
+		httpCode = http.StatusForbidden
+		gtbackend.DebugLogErrNoMsg(log, err)
+		return
+	}
 
 	// Delete file from storage
 	storageClient, err := app.Storage(ctx)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "DeleteTrack", Err: err, Msg: "StorageClient"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return
 	}
 
 	bucket, err := storageClient.DefaultBucket()
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "DeleteTrack", Err: err, Msg: "Bucket"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return
 	}
 
 	err = bucket.Object(trackID).Delete(ctx)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "DeleteTrack", Err: err, Msg: "FileDelete"})
-
-		return
-	}
-
-	// Delete file from firestore
-	client, err := app.Firestore(ctx)
-	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "DeleteTrack", Err: err, Msg: "FirestoreClient"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return
 	}
 
 	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Delete(ctx)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "DeleteTrack", Err: err, Msg: "MetadataDelete"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return
 	}
@@ -120,42 +132,54 @@ func DeleteTrack(app *firebase.App, trackID string) (httpCode int, err error) {
 	return
 }
 
+// UpdatePrivacy Updates privacy setting to new variable
 func UpdatePrivacy(app *firebase.App, trackID string, uid string, newSetting bool) (updated models.IgcMetadata, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "UpdatePrivacy")
+
+	// Can only update privacy on owned tracks
 	client, updated, err := getTrackMetadata(app, trackID, uid, true)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "UpdatePrivacy", Err: err, Msg: "Fail get metadata"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 		return
 	}
 
+	// Set privacy and update it on firestore
 	updated.Privacy = newSetting
 	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Set(context.Background(), updated)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "UpdatePrivacy", Err: err, Msg: "Fail set metadata"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 	}
 
 	return
 }
 
+// TakeOwnership Takes ownership of a track owned by the ScraperUID
 func TakeOwnership(app *firebase.App, trackID string, uid string) (own models.IgcMetadata, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "TakeOwnership")
+
+	// Verify that the Scraper owns the track
 	client, own, err := getTrackMetadata(app, trackID, constant.ScraperUID, true)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "TakeOwnership", Err: err, Msg: "Fail get metadata"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 		return
 	}
 
+	// Take ownership and update status on firestore
 	own.UID = uid
 	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Set(context.Background(), own)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "TakeOwnership", Err: err, Msg: "Fail set metadata"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 	}
 
 	return
 }
 
+// InsertTrackPoint Inserts TrackPoint data for caching in the database
 func InsertTrackPoint(app *firebase.App, trackID string, uid string, data []models.TrackPoint) (updated models.IgcMetadata, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "InsertTrackPoint")
 	client, updated, err := getTrackMetadata(app, trackID, uid, false)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "InsertTrackPoint", Err: err, Msg: "Fail get metadata"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 		return
 	}
 
@@ -163,35 +187,37 @@ func InsertTrackPoint(app *firebase.App, trackID string, uid string, data []mode
 
 	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Set(context.Background(), updated)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "InsertTrackPoint", Err: err, Msg: "Fail set metadata"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 	}
 
 	return
 }
 
+// Gets a single track metadata from firestore, can optionally verify that UID matches for security
 func getTrackMetadata(app *firebase.App, trackID string, uid string, verifyUID bool) (client *firestore.Client, data models.IgcMetadata, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "getTrackMetadata")
 	ctx := context.Background()
 
 	client, err = app.Firestore(ctx)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getFirebaseClient", Err: err, Msg: "FirestoreClient"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 	}
 
 	doc, err := client.Collection(constant.IgcMetadata).Doc(trackID).Get(ctx)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getTrackMetadata", Err: err, Msg: "FirestoreClient"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 		return
 	}
 
 	d, err := documentToModel(doc)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getTrackMetadata", Err: err, Msg: "FirestoreClient"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 		return
 	}
 
 	if verifyUID && d.UID != uid {
 		err = errors.New(constant.ErrorForbidden)
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "getTrackMetadata", Err: err, Msg: "FirestoreClient"})
+		gtbackend.DebugLogErrNoMsg(log, err)
 		return
 	}
 
@@ -200,11 +226,13 @@ func getTrackMetadata(app *firebase.App, trackID string, uid string, verifyUID b
 	return
 }
 
+// documentToModel Pulls an IgcMetadata object out of a DocumentSnapshot
 func documentToModel(doc *firestore.DocumentSnapshot) (data models.IgcMetadata, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "documentToModel")
 	// Convert doc to our model
 	err = doc.DataTo(&data)
 	if err != nil {
-		gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "processIterGetTracks", Err: err})
+		gtbackend.DebugLogErrNoMsg(log, err)
 
 		return data, err
 	}
@@ -217,6 +245,7 @@ iter *firestore.DocumentIterator Iterator with the results from firestore
 filterUID string Filter UID to remove from the results
 */
 func processIterGetTracks(iter *firestore.DocumentIterator, filterUID string) (data []models.IgcMetadata, err error) {
+	log := gtbackend.DebugLogPrepareHeader(fileNameFQH, "processIterGetTracks")
 	// Process track query until length of data is the size of a page
 	for len(data) < constant.PageSize {
 		doc, err := iter.Next()
@@ -226,14 +255,14 @@ func processIterGetTracks(iter *firestore.DocumentIterator, filterUID string) (d
 			break
 		}
 		if err != nil {
-			gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "processIterGetTracks", Err: err})
+			gtbackend.DebugLogErrNoMsg(log, err)
 
 			return data, err
 		}
 
 		d, err := documentToModel(doc)
 		if err != nil {
-			gtbackend.DebugLog(gtbackend.InternalLog{Origin: fileNameFQH, Method: "processIterGetTracks", Err: err})
+			gtbackend.DebugLogErrNoMsg(log, err)
 
 			return data, err
 		}

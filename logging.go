@@ -13,12 +13,18 @@ import (
 // LoggingMiddleware - capture http.Handle.
 type LoggingMiddleware func(http.Handler) http.Handler
 
-// InternalLog internal log entry
-type InternalLog struct {
+// internalLog internal log entry
+type internalLog struct {
 	Origin string
 	Method string
 	Err    error
 	Msg    string
+}
+
+// InternalLogHeader internal log entry without error and message for initialization
+type InternalLogHeader struct {
+	Origin string
+	Method string
 }
 
 // LogConfig enables users to dictate where log file are to be put.
@@ -50,38 +56,68 @@ func LogIncomingRequests(next http.Handler) http.Handler {
 	})
 }
 
-// DebugLog - Log an error internally, will contain implementation specific information.
-func DebugLog(entry InternalLog) {
-	abs, _ := filepath.Abs(config.Path)
-	setLogPath(abs)
-
-	path := filepath.Join(abs, APPLICATION)
-
-	writer, err := GetLogWriter(path)
-	if err != nil {
-		logrus.Error(err.Error())
-	}
-
-	writers := []io.Writer{os.Stderr, writer}
-	logInternal(entry, writers, "Error thrown")
+// DebugLogErrNoMsg - Logs request without message
+func DebugLogErrNoMsg(h InternalLogHeader, err error) {
+	debugLog(internalLog{
+		Origin: h.Origin,
+		Method: h.Method,
+		Err:    err,
+	})
 }
 
-// LogFatal log to writers and exit app.
-func LogFatal(entry InternalLog) {
-	abs, _ := filepath.Abs(config.Path)
-	setLogPath(abs)
+// DebugLogErrMsg - Logs request with both error and message
+func DebugLogErrMsg(h InternalLogHeader, err error, msg string) {
+	debugLog(internalLog{
+		Origin: h.Origin,
+		Method: h.Method,
+		Err:    err,
+		Msg:    msg,
+	})
+}
 
-	path := filepath.Join(abs, APPLICATION)
+// DebugLogNoErrMsg - Logs request without error
+func DebugLogNoErrMsg(h InternalLogHeader, msg string) {
+	debugLog(internalLog{
+		Origin: h.Origin,
+		Method: h.Method,
+		Msg:    msg,
+	})
+}
 
-	writer, err := GetLogWriter(path)
-	if err != nil {
-		logrus.Error(err.Error())
+// LogFatalErrNoMsg - Logs request without message
+func LogFatalErrNoMsg(h InternalLogHeader, err error) {
+	logFatal(internalLog{
+		Origin: h.Origin,
+		Method: h.Method,
+		Err:    err,
+	})
+}
+
+// LogFatalErrMsg - Logs request with both error and message
+func LogFatalErrMsg(h InternalLogHeader, err error, msg string) {
+	logFatal(internalLog{
+		Origin: h.Origin,
+		Method: h.Method,
+		Err:    err,
+		Msg:    msg,
+	})
+}
+
+// LogFatalNoErrMsg - Logs request without error
+func LogFatalNoErrMsg(h InternalLogHeader, msg string) {
+	logFatal(internalLog{
+		Origin: h.Origin,
+		Method: h.Method,
+		Msg:    msg,
+	})
+}
+
+// DebugLogPrepareHeader - Returns a prepared header for logging
+func DebugLogPrepareHeader(origin string, method string) InternalLogHeader {
+	return InternalLogHeader{
+		Origin: origin,
+		Method: method,
 	}
-
-	writers := []io.Writer{os.Stderr, writer}
-
-	logInternal(entry, writers, "Fatal")
-	logrus.Fatal("Shutting down")
 }
 
 // GetLogWriter will return a file log writer.
@@ -111,6 +147,40 @@ func SetLogConfigDefault() {
 	config = LogConfig{
 		LOGS,
 	}
+}
+
+// debugLog - Log an error internally, will contain implementation specific information.
+func debugLog(entry internalLog) {
+	abs, _ := filepath.Abs(config.Path)
+	setLogPath(abs)
+
+	path := filepath.Join(abs, APPLICATION)
+
+	writer, err := GetLogWriter(path)
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+
+	writers := []io.Writer{os.Stderr, writer}
+	logInternal(entry, writers, "Error thrown")
+}
+
+// logFatal log to writers and exit app.
+func logFatal(entry internalLog) {
+	abs, _ := filepath.Abs(config.Path)
+	setLogPath(abs)
+
+	path := filepath.Join(abs, APPLICATION)
+
+	writer, err := GetLogWriter(path)
+	if err != nil {
+		logrus.Error(err.Error())
+	}
+
+	writers := []io.Writer{os.Stderr, writer}
+
+	logInternal(entry, writers, "Fatal")
+	logrus.Fatal("Shutting down")
 }
 
 func logIncomingRequests(r *http.Request) {
@@ -149,7 +219,7 @@ func logRequest(writers []io.Writer, r *http.Request, msg string) {
 }
 
 // logInternal message - usually a error
-func logInternal(entry InternalLog, writers []io.Writer, msg string) {
+func logInternal(entry internalLog, writers []io.Writer, msg string) {
 	logger := logrus.New()
 
 	logEntry := logger.WithFields(logrus.Fields{

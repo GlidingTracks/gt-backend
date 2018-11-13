@@ -47,7 +47,7 @@ func TestProcessUpload(t *testing.T) {
 	}
 
 	code, md, err := ProcessUploadRequest(app, req)
-	if err != nil && code != 200 {
+	if err != nil && code != http.StatusOK {
 		t.Error("Could not save file, should pass", err)
 	}
 
@@ -56,8 +56,13 @@ func TestProcessUpload(t *testing.T) {
 		t.Error("UID of returned object should be TestUID", err)
 	}
 
-	code, err = DeleteTrack(app, md.TrackID)
-	if err != nil && code != 200 {
+	code, err = DeleteTrack(app, md.TrackID, constant.ScraperUID)
+	if err == nil || code != http.StatusForbidden {
+		t.Error("This deletion SHOULD FAIL! (ScraperUID should no longer own this track)")
+	}
+
+	code, err = DeleteTrack(app, md.TrackID, constant.TestUID)
+	if err != nil && code != http.StatusOK {
 		t.Error("Could not delete data, should delete data")
 	}
 
