@@ -23,8 +23,8 @@ const FirebaseQueryOrder = "Time"
 // MaxIgcFileSize - Max size of an IGC file (MB - KB - B)
 const MaxIgcFileSize = 15 * 1024 * 1024
 
-// Scraper UID
+// ScraperUID - Scraper UID
 const ScraperUID = "Hvl8FlvVz6QSKkNjsDeLB5aKBmA2"
 
-// E2E Test UID
+// TestUID - E2E Test UID
 const TestUID = "o1Sz791YSHby0PCe51JlxSD6G533"
