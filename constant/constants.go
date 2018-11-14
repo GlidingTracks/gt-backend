@@ -24,7 +24,7 @@ const FirebaseQueryOrder = "Time"
 const MaxIgcFileSize = 15 * 1024 * 1024
 
 // ScraperUID - Scraper UID
-const ScraperUID = "Hvl8FlvVz6QSKkNjsDeLB5aKBmA2"
+const ScraperUID = "iP1dgAHJ2JNce4hGr9H0RugkCHP2"
 
 // TestUID - E2E Test UID
 const TestUID = "o1Sz791YSHby0PCe51JlxSD6G533"
