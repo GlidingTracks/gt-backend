@@ -11,9 +11,6 @@ const GoogleCredEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
 // FirebaseStorageBucket url
 const FirebaseStorageBucket = "gt-backend-8b9c2.appspot.com"
 
-// CollectionTracks - Name of collection containing tracks in firestore.
-const CollectionTracks = "tracks"
-
 // IgcMetadata - Name of the collection containing igc metadata in firestore
 const IgcMetadata = "igc-metadata"
 
@@ -25,3 +22,9 @@ const FirebaseQueryOrder = "Time"
 
 // MaxIgcFileSize - Max size of an IGC file (MB - KB - B)
 const MaxIgcFileSize = 15 * 1024 * 1024
+
+// ScraperUID - Scraper UID
+const ScraperUID = "Hvl8FlvVz6QSKkNjsDeLB5aKBmA2"
+
+// TestUID - E2E Test UID
+const TestUID = "o1Sz791YSHby0PCe51JlxSD6G533"

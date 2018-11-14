@@ -19,3 +19,6 @@ const Get = "GET"
 
 // Delete - DELETE http method
 const Delete = "DELETE"
+
+// Put - PUT http method
+const Put = "PUT"

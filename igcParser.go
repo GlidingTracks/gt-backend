@@ -46,9 +46,10 @@ type Parser struct {
 
 // Parse - main routine for parsing a IGC-track. Returns a Record.
 func (parser Parser) Parse() (rec Record, err error) {
+	log := DebugLogPrepareHeader(fileNameIP, "Parse")
 	if parser.Parsed == "" {
 		err = errors.New("Empty file")
-		DebugLog(InternalLog{Origin: fileNameIP, Method: "Parse", Err: err, Msg: "No lines in file"})
+		DebugLogErrMsg(log, err, "No lines in file")
 
 		return
 	}
@@ -76,6 +77,7 @@ func parseA(record string) (man A) {
 // parseH processes different Hxxxxxx... fields into a H object, which is returned.
 // Unsupported encountered keys is stdouted on DebugLvl info.
 func (parser Parser) parseH(hRecords []string) (header H) {
+	log := DebugLogPrepareHeader(fileNameIP, "parseH")
 	keys := make(map[string]string)
 
 	for i := 0; i < len(hRecords); i++ {
@@ -105,11 +107,7 @@ func (parser Parser) parseH(hRecords []string) (header H) {
 		case "DTE":
 			header.Date = v[0:6]
 		default:
-			DebugLog(InternalLog{
-				Origin: fileNameIP,
-				Method: "parseH",
-				Msg:    "Unsupported key: " + k,
-			})
+			DebugLogNoErrMsg(log, "Unsupported key: "+k)
 		}
 	}
 

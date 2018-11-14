@@ -29,3 +29,6 @@ const ErrorDeleteUser = "failed to delete user"
 
 // ErrorInvalidContentType - not a igc file
 const ErrorInvalidContentType = "invalid content-type"
+
+// ErrorForbidden - action not permitted
+const ErrorForbidden = "Forbidden"

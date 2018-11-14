@@ -48,36 +48,13 @@ type authResponse struct {
 }
 
 // RetrieveFirebaseIDToken Firebase initialization with auth token to get past security checking
-func RetrieveFirebaseIDToken() (app *firebase.App, token string) {
-	app, token = RetrieveFirebaseIDTokenCredFile(true)
-	return
-}
-
-// RetrieveFirebaseIDTokenCredFile Firebase initialization with auth token to get past security checking, with flag to open Firebase file in different folder
-func RetrieveFirebaseIDTokenCredFile(credNotInFolder bool) (app *firebase.App, token string) {
-	config := &firebase.Config{
-		StorageBucket: "gt-backend-8b9c2.appspot.com",
-	}
-
-	credPath := ""
-	if credNotInFolder {
-		credPath = "../" + constant.GoogleServiceCredName
-	} else {
-		credPath = constant.GoogleServiceCredName
-	}
-	opt := option.WithCredentialsFile(credPath)
-
-	app, err := firebase.NewApp(context.Background(), config, opt)
-	if err != nil {
-		logrus.Fatalf("error initializing app: %v\n", err)
-	}
-
+func RetrieveFirebaseIDToken(app *firebase.App, uid string) (token string) {
 	client, err := app.Auth(context.Background())
 	if err != nil {
 		logrus.Fatalf("error initializing auth: %v\n", err)
 	}
 
-	token, err = client.CustomToken(context.Background(), "o1Sz791YSHby0PCe51JlxSD6G533")
+	token, err = client.CustomToken(context.Background(), uid)
 	if err != nil {
 		logrus.Fatalf("error setting custom token: %v\n", err)
 	}
@@ -104,6 +81,5 @@ func RetrieveFirebaseIDTokenCredFile(credNotInFolder bool) (app *firebase.App, t
 	}
 
 	token = resParsed.IDToken
-
 	return
 }
