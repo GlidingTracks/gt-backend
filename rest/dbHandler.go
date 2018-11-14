@@ -164,8 +164,7 @@ func (dbHandler DbHandler) insertTrackPointPage(w http.ResponseWriter, r *http.R
 
 	// Parse into objects the string JSON from header
 	var parsed []models.TrackPoint
-	err := json.Unmarshal([]byte(rawJSON), &parsed)
-	if err != nil {
+	if err := json.Unmarshal([]byte(rawJSON), &parsed); err != nil {
 		gtbackend.DebugLogErrNoMsg(log, err)
 
 		http.Error(w, err.Error(), http.StatusBadRequest)
