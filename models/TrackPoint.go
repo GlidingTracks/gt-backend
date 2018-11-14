@@ -2,7 +2,7 @@ package models
 
 // TrackPoint A TrackPoint object used to compress Track data shown to user
 type TrackPoint struct {
-	Time        int64   `json:"Type"`
+	Time        int64   `json:"Time"`
 	Latitude    float64 `json:"Latitude"`
 	Longitude   float64 `json:"Longitude"`
 	Valid       bool    `json:"Valid"`
