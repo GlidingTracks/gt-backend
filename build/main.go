@@ -25,6 +25,7 @@ func main() {
 	rCors := rest.CompleteRouterSetup(app)
 
 	port := os.Getenv("PORT")
+	port = "8080"
 	if port == "" {
 		gtbackend.LogFatalNoErrMsg(log, "$PORT must be set")
 	}

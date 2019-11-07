@@ -49,6 +49,13 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 		return
 	}
 
+	parsed, err = analyzeIGC(parsed)
+
+	if err != nil {
+		httpCode = http.StatusNoContent
+		return
+	}
+
 	// Deduce file privacy
 	isPrivate := r.FormValue("private")
 	bp := gtbackend.GetBoolFromString(isPrivate)
@@ -57,9 +64,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 	md, err = uploadMetadataToFirestore(app, uid, parsed, bp)
 	if err != nil {
 		gtbackend.DebugLogErrNoMsg(log, err)
-
 		httpCode = http.StatusBadRequest
-
 		return
 	}
 
@@ -143,7 +148,7 @@ func uploadMetadataToFirestore(app *firebase.App, uid string, parsed string, isP
 	md = models.IgcMetadata{
 		Privacy: isPrivate,
 		Time:    gtbackend.GetUnixTime(),
-		UID:     uid,
+		Uid:     uid,
 		Record:  pIGC,
 		TrackID: "placeholder",
 	}

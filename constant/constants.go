@@ -3,13 +3,13 @@ package constant
 
 // GoogleServiceCredName supplies the name of the file containing credentials for our
 // Google service account. Used to authenticate with firebase.
-const GoogleServiceCredName = "gt-backend-8b9c2-firebase-adminsdk-0t965-d5b53ac637.json"
+const GoogleServiceCredName = "gt-backend-12f5a-firebase-adminsdk-agjnd-2b80155741.json"
 
 // GoogleCredEnvVar - name of environment variable for hosting cred file in cloud
 const GoogleCredEnvVar = "GOOGLE_APPLICATION_CREDENTIALS"
 
 // FirebaseStorageBucket url
-const FirebaseStorageBucket = "gt-backend-8b9c2.appspot.com"
+const FirebaseStorageBucket = "gt-backend-12f5a.appspot.com"
 
 // IgcMetadata - Name of the collection containing igc metadata in firestore
 const IgcMetadata = "igc-metadata"
