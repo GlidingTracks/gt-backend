@@ -57,7 +57,7 @@ func GetTrack(app *firebase.App, trackID string, uid string) (data []byte, err e
 
 	// Verify that the user can download the file and abort if not
 	_, d, err := getTrackMetadata(app, trackID, uid, false)
-	if d.Privacy == true && d.UID != uid {
+	if d.Privacy == true && d.Uid != uid {
 		err = errors.New(constant.ErrorForbidden)
 		gtbackend.DebugLogErrNoMsg(log, err)
 		return
@@ -165,7 +165,7 @@ func TakeOwnership(app *firebase.App, trackID string, uid string) (own models.Ig
 	}
 
 	// Take ownership and update status on firestore
-	own.UID = uid
+	own.Uid = uid
 	_, err = client.Collection(constant.IgcMetadata).Doc(trackID).Set(context.Background(), own)
 	if err != nil {
 		gtbackend.DebugLogErrNoMsg(log, err)
@@ -215,7 +215,7 @@ func getTrackMetadata(app *firebase.App, trackID string, uid string, verifyUID b
 		return
 	}
 
-	if verifyUID && d.UID != uid {
+	if verifyUID && d.Uid != uid {
 		err = errors.New(constant.ErrorForbidden)
 		gtbackend.DebugLogErrNoMsg(log, err)
 		return
@@ -268,7 +268,7 @@ func processIterGetTracks(iter *firestore.DocumentIterator, filterUID string) (d
 		}
 
 		// Filter out matching UID and add to data
-		if d.UID != filterUID && d.UID != "" {
+		if d.Uid != filterUID && d.Uid != "" {
 			data = append(data, d)
 		}
 	}

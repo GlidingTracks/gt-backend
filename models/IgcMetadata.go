@@ -7,7 +7,7 @@ import "github.com/GlidingTracks/gt-backend"
 type IgcMetadata struct {
 	Privacy     bool
 	Time        int64
-	UID         string
+	Uid         string
 	Record      gtbackend.Record
 	TrackID     string
 	TrackPoints []TrackPoint
