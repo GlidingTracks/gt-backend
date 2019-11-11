@@ -49,7 +49,7 @@ func ProcessUploadRequest(app *firebase.App, r *http.Request) (httpCode int, md 
 		return
 	}
 
-	parsed, err = analyzeIGC(parsed)
+	parsed, err = AnalyzeIGC(parsed)
 
 	if err != nil {
 		httpCode = http.StatusNoContent

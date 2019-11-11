@@ -3,24 +3,26 @@ package rest
 import (
 	"fmt"
 	"github.com/marni/goigc"
+	"math"
 	"strings"
 )
 
 // fileNameFUH - Used in debugging.
 const fileNameFAH = "fileAnalyzeHandler.go"
 
-func analyzeIGC(content string) (contentWithResults string, err error) {
+func AnalyzeIGC(content string) (contentWithResults string, err error) {
 	track, err := igc.Parse(content)
+	//track, err := igc.ParseLocation(content)
 	if err != nil {
 		fmt.Errorf("Problem reading the track", err)
 		return
 	}
-	initEvents := analysisTimeBoundEvent(track)
-	contentWithResults = saveResultAsIGCMetadata(content, initEvents)
+	initEvents, soaringEvents := analysisTimeBoundEvent(track)
+	contentWithResults = saveResultAsIGCMetadata(content, initEvents, soaringEvents)
 	return
 }
 
-func saveResultAsIGCMetadata(content string, results []string) (contentWithResults string) {
+func saveResultAsIGCMetadata(content string, results []string, soaring []string) (contentWithResults string) {
 	lines := strings.Split(content, "\n")
 	j := 0
 	for i := range lines {
@@ -30,7 +32,7 @@ func saveResultAsIGCMetadata(content string, results []string) (contentWithResul
 			continue
 		}
 		if line[0] == 'B' {
-			lines[i] = line + results[j] + "\r"
+			lines[i] = line + results[j] + soaring[j] + "\r"
 			j++
 		} else {
 			continue
@@ -40,7 +42,7 @@ func saveResultAsIGCMetadata(content string, results []string) (contentWithResul
 	return
 }
 
-func analysisTimeBoundEvent(track igc.Track) (initEvents []string) {
+func analysisTimeBoundEvent(track igc.Track) (initEvents []string, soaringEvents []string) {
 
 	var peaks []int
 	var troughs []int
@@ -88,6 +90,9 @@ func analysisTimeBoundEvent(track igc.Track) (initEvents []string) {
 	//calculate the average speed between every peak and trough
 	aveSpeed := calculateAverageSpeed(troughs, peaks, track.Points)
 
+	//recognize the soaring events
+	soaringEvents = findSoaring(track.Points)
+
 	//use average speed to recognize init time-bound events
 	for i := 0; i < len(aveSpeed); i++ {
 		initEvents = append(initEvents, recogniseTimeBoundEvent(aveSpeed[i]))
@@ -101,7 +106,7 @@ func analysisTimeBoundEvent(track igc.Track) (initEvents []string) {
 	//	fmt.Printf("%d:%d:%d index:%d, altitude:%d， %s\n", h+2, m, s, i,point.GNSSAltitude,initEvents[i])
 	//}
 
-	return initEvents
+	return initEvents, soaringEvents
 
 }
 
@@ -242,6 +247,32 @@ func recogniseTimeBoundEvent(speed float32) (timeBoundEvents string) {
 			timeBoundEvents = "sinking"
 		} else {
 			timeBoundEvents = "severe sinking"
+		}
+	}
+	return
+}
+
+func findSoaring(trackPoints []igc.Point) (soaringEvents []string) {
+	for i := 0; i < len(trackPoints); i++ {
+		soaringEvents = append(soaringEvents, "")
+	}
+	startI := 0
+	endI := 0
+	for i := 0; i < len(trackPoints); i++ {
+		startI = i
+		for j := i + 1; j < len(trackPoints); j++ {
+			if math.Abs(float64(trackPoints[j].GNSSAltitude-trackPoints[i].GNSSAltitude)) <= 1 {
+				continue
+			} else {
+				endI = j - 1
+				break
+
+			}
+		}
+		if endI-startI >= 5 {
+			for k := startI; k <= endI; k++ {
+				soaringEvents[k] = " and soaring"
+			}
 		}
 	}
 	return
